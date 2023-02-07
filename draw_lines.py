@@ -31,6 +31,7 @@ class Drawer(QWidget):
         self.brushColor = Qt.black
 
     def resizeEvent(self, event):
+        #This function allows for the resizing of the image layer whenever the drawing widget is resized (no real purpose as of now, comeback to this later)
         if (
             self.size().width() > self._image_layer.width()
             or self.size().height() > self._image_layer.height()
@@ -135,40 +136,22 @@ class Window(QMainWindow):
         central_widget = QWidget()
         self.drawer = Drawer(central_widget)
        
-        #The below code format the layout using the GridLayout class
-        #I dont think we should use it because its annoying when you try to adjust the size of widget or the window.
-        #going to proceed without it and see what happens
-        # gridlay = QGridLayout()
-        # gridlay.addWidget(self.drawer, 1, 0)
-
-        # gridlay.addItem(QSpacerItem(800,800), 1, 1)
-        # gridlay.addItem(QSpacerItem(800, 800), 0, 1)
-        # gridlay.addItem(QSpacerItem(800,800), 0, 0)
-
-        # gridlay.setRowStretch(0,1)
-        # gridlay.setColumnStretch(1,1)
-
-
-
-
-        
+    
         self.drawer.move(100,800)
-        self.drawer.resize(700,500)
+        self.drawer.resize(1080,720)
 
-        # central_widget.setLayout(gridlay)
 
         self.setCentralWidget(central_widget)
-        
+        self.setGeometry(0,0,2330, 1770)
+
+       
 
 
-        # vlay.setContentsMargins(0, 0, 0, 0)
-        # # vlay.addStretch(1)
-        # vlay.addWidget(self.drawer) #,stretch=0)
+    def resizeEvent(self, event):
+        # print(self.size())
+        pass
 
 
-        # r = QGuiApplication.primaryScreen().availableGeometry()
-        
-        self.setGeometry(0,0,1500, 1500)
 
 
 if __name__ == "__main__":
@@ -192,3 +175,31 @@ if __name__ == "__main__":
 
 
     sys.exit(app.exec())
+
+
+
+
+
+ #****The below code format the layout using the GridLayout class****
+        # central_widget.setLayout(gridlay)
+        #I dont think we should use it because its annoying when you try to adjust the size of widget or the window.
+        #going to proceed without it and see what happens
+        # gridlay = QGridLayout()
+        # gridlay.addWidget(self.drawer, 1, 0)
+
+        # gridlay.addItem(QSpacerItem(800,800), 1, 1)
+        # gridlay.addItem(QSpacerItem(800, 800), 0, 1)
+        # gridlay.addItem(QSpacerItem(800,800), 0, 0)
+
+        # gridlay.setRowStretch(0,1)
+        # gridlay.setColumnStretch(1,1)
+
+        
+        # vlay.setContentsMargins(0, 0, 0, 0)
+        # # vlay.addStretch(1)
+        # vlay.addWidget(self.drawer) #,stretch=0)
+
+
+        # r = QGuiApplication.primaryScreen().availableGeometry()
+
+        #**************************************************************************************************************
