@@ -34,7 +34,7 @@ import sys
 
 from PyQt5.QtCore import QPoint, Qt
 from PyQt5.QtGui import QBrush, QGuiApplication, QImage, QPainter, QPen, QColor
-from PyQt5.QtWidgets import *# QApplication, QMainWindow, QVBoxLayout, QWidget
+from PyQt5.QtWidgets import *# QApplication, QMainWindow, QVBoxLayout, QWidget, QCheckBox
 
 
 class Drawer(QWidget):
@@ -43,7 +43,10 @@ class Drawer(QWidget):
 
         #creating variables and object to store coordinates of mouse click points and 
         #track where in the drawing process the user is
-        self.firstclick = True
+        self.points = []
+        self.firstclick = False
+        self.last_click = False
+        self.editing = False
         self.firstpoint = QPoint()
 
         self._drawing = False
@@ -63,10 +66,12 @@ class Drawer(QWidget):
         self.brushColor = Qt.black
 
     def resizeEvent(self, event):
+        
         #This function allows for the resizing of the image layer whenever the drawing widget is resized (no real purpose as of now, comeback to this later)
         if (
             self.size().width() > self._image_layer.width()
-            or self.size().height() > self._image_layer.height()
+            or self.size().height() > self._image_layer.height() or self.size().width() < self._image_layer.width()
+            or self.size().height() < self._image_layer.height()
         ):
             qimg = QImage(
                 max(self.size().width(), self._image_layer.width()),
@@ -75,88 +80,121 @@ class Drawer(QWidget):
             )
             qimg.fill(QColor("#D0d8dc"))
             painter = QPainter(qimg)
-            painter.drawImage(QPoint(), self._image_layer)
-            painter.end()
+            # painter.drawImage(QPoint(), self._image_layer)
+
+            # painter.end()
             self._image_layer = qimg
             self.update()
 
 
 
     def mousePressEvent(self, event):
-
         #on the first click, draw a circle showing where you clicked
-        if self.firstclick == True:
+        if len(self.points) == 0:
+            self.firstclick = True
             self.firstpoint = event.pos()
-            painter = QPainter(self._image_layer)
-            painter.setPen(
-                QPen(
-                    self.brushColor,
-                    self.circleBrushSize,
-                    Qt.SolidLine,
-                    Qt.RoundCap,
-                    Qt.RoundJoin,
-                )
-            )
-            painter.drawEllipse(self.firstpoint, 20, 20)
+            self.points.append(self.firstpoint)
             self.update()
 
         #on the second click, draw line to endpoint
-        else:
+        elif len(self.points) == 1:
+            self.last_click = True
             self.last_point = event.pos()
+            self.points.append(self.last_point)
+            self.update()        
 
-            painter = QPainter(self._image_layer)
+        elif ( self.editing and 
+        self.points[1].x() -20 <= event.pos().x() <= self.points[1].x() + 20 
+        and self.points[1].y() -20 <= event.pos().y() <= self.points[1].y() + 20 
+        ):
+            print("inna circle")
+        return
+     
+
+        
+        # self._drawing = True
+        # self.last_point = event.pos()
+
+    def mouseMoveEvent(self, event):
+        if self.last_click:
+        # self.firstclick = False
+            self.points.pop()
+            self.last_point = event.pos()
+            self.points.append(self.last_point)
+            self.update()
+
+    def mouseReleaseEvent(self, event):
+        if self.firstclick:
+            self.firstclick = not self.firstclick
+        if self.last_click:
+            self.last_click = not self.last_click
+
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        # img_painter = QPainter(self._image_layer)
+        painter.drawImage(QPoint(), self._image_layer)
+
+
+        if self.points == []:
+            return
+
+        # if self.firstclick:
+        if len(self.points) == 1:
             painter.setPen(
                 QPen(
-                    self.brushColor,
-                    self.brushSize,
-                    Qt.SolidLine,
-                    Qt.RoundCap,
-                    Qt.RoundJoin,
-                )
+                        self.brushColor,
+                        self.circleBrushSize,
+                        Qt.SolidLine,
+                        Qt.RoundCap,
+                        Qt.RoundJoin,
+                    )
+            )
+        
+            painter.drawEllipse(self.firstpoint, 20, 20)
+
+        # elif self.last_click:
+        if len(self.points) == 2:
+
+            painter.drawImage(QPoint(), self._image_layer)
+            # img_painter = QPainter(self._image_layer)
+            painter.setPen(
+                QPen(
+                        self.brushColor,
+                        self.circleBrushSize,
+                        Qt.SolidLine,
+                        Qt.RoundCap,
+                        Qt.RoundJoin,
+                    )
+            )
+            painter.drawEllipse(self.firstpoint, 20, 20)
+
+            painter.setPen(
+                QPen(
+                        self.brushColor,
+                        self.brushSize,
+                        Qt.SolidLine,
+                        Qt.RoundCap,
+                        Qt.RoundJoin,
+                    )
             )
             painter.drawLine(self.firstpoint, self.last_point)
 
             painter.setPen(
                 QPen(
-                    self.brushColor,
-                    self.circleBrushSize,
-                    Qt.SolidLine,
-                    Qt.RoundCap,
-                    Qt.RoundJoin,
-                )
+                        self.brushColor,
+                        self.circleBrushSize,
+                        Qt.SolidLine,
+                        Qt.RoundCap,
+                        Qt.RoundJoin,
+                    )
             )
+            
             painter.drawEllipse(self.last_point, 20, 20)
 
-            self.update()
-        
-        #mycode
-        self._drawing = True
-        # self.last_point = event.pos()
 
-    def mouseMoveEvent(self, event):
-        if self._drawing and event.buttons() & Qt.LeftButton:
-            painter = QPainter(self._image_layer)
-            painter.setPen(
-                QPen(
-                    self.brushColor,
-                    self.brushSize,
-                    Qt.SolidLine,
-                    Qt.RoundCap,
-                    Qt.RoundJoin,
-                )
-            )
-            painter.drawLine(self.firstpoint, event.pos())
-            self.last_point = event.pos()
-            self.update()
-
-    def mouseReleaseEvent(self, event):
-        self.firstclick = not self.firstclick
-
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.drawImage(QPoint(), self._image_layer)
         painter.end()
+        
         
 
 
@@ -174,7 +212,25 @@ class Window(QMainWindow):
 
 
         self.setCentralWidget(central_widget)
-        self.setGeometry(0,0,2330, 1770)
+        # self.setGeometry(0,0,2330, 1770)
+        self.setGeometry(0,0,2000, 1600)
+
+
+        self.checkbox = QCheckBox('edit?', self)
+        self.checkbox.move(100, 700)
+        self.checkbox.stateChanged.connect(self.checkbox_state_changed)
+
+    def checkbox_state_changed(self, state):
+        self.drawer.editing = state
+        print('Checkbox state changed:', state)
+        # self.checkbox.stateChanged.connect(self.checkbox_state_changed)
+
+
+    def checkbox_state_changed(self, state):
+        print(self.checkbox.isChecked())
+
+    # def closeEvent(self, event):
+    #     print('Checkbox is checked:', self.checkbox.isChecked())
 
        
 
@@ -199,8 +255,8 @@ if __name__ == "__main__":
     placement = QPoint(int(x),int(y))
 
     # print(screen_geometry)
-    print(placement)
-    print(window.width(), window.height())
+    # print(placement)
+    # print(window.width(), window.height())
 
     window.move(placement)
     window.show()
