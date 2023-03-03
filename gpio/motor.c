@@ -43,61 +43,61 @@ int main(){
    
         getInput();
         ftime(&start);
-        runMotor(1600, 1600000L, 0, 21, 20);
+        runMotor(200, 1600000L, 0, 21, 20);
         ftime(&end);
         printf("Time: %u\n", (int)(1000 * (end.time - start.time) + (end.millitm - start.millitm)));
 
         getInput();
         ftime(&start);
-        runMotor(1600, 800000L, 0, 21, 20);
+        runMotor(200, 800000L, 0, 21, 20);
         ftime(&end);
         printf("Time: %u\n", (int)(1000 * (end.time - start.time) + (end.millitm - start.millitm)));
 
         getInput();
         ftime(&start);
-        runMotor(1600, 400000L, 0, 21, 20);
+        runMotor(200, 400000L, 0, 21, 20);
         ftime(&end);
         printf("Time: %u\n", (int)(1000 * (end.time - start.time) + (end.millitm - start.millitm)));
 
         getInput();
         ftime(&start);
-        runMotor(1600, 200000L, 0, 21, 20);
+        runMotor(200, 200000L, 0, 21, 20);
         ftime(&end);
         printf("Time: %u\n", (int)(1000 * (end.time - start.time) + (end.millitm - start.millitm)));
 
         getInput();
         ftime(&start);
-        runMotor(1600, 100000L, 0, 21, 20);
+        runMotor(200, 100000L, 0, 21, 20);
         ftime(&end);
         printf("Time: %u\n", (int)(1000 * (end.time - start.time) + (end.millitm - start.millitm)));
 
         getInput();
         ftime(&start);
-        runMotor(1600, 50000L, 0, 21, 20);
+        runMotor(200, 50000L, 0, 21, 20);
         ftime(&end);
         printf("Time: %u\n", (int)(1000 * (end.time - start.time) + (end.millitm - start.millitm)));
 
                 getInput();
         ftime(&start);
-        runMotor(1600, 10000L, 0, 21, 20);
+        runMotor(200, 10000L, 0, 21, 20);
         ftime(&end);
         printf("Time: %u\n", (int)(1000 * (end.time - start.time) + (end.millitm - start.millitm)));
 
         getInput();
                 ftime(&start);
-        runMotor(1600, 5000L, 0, 21, 20);
+        runMotor(200, 5000L, 0, 21, 20);
         ftime(&end);
         printf("Time: %u\n", (int)(1000 * (end.time - start.time) + (end.millitm - start.millitm)));
 
         getInput();
                         ftime(&start);
-        runMotor(1600, 1000L, 0, 21, 20);
+        runMotor(200, 1000L, 0, 21, 20);
         ftime(&end);
         printf("Time: %u\n", (int)(1000 * (end.time - start.time) + (end.millitm - start.millitm)));
 
         getInput();
                                 ftime(&start);
-        runMotor(1600, 500L, 0, 21, 20);
+        runMotor(200, 500L, 0, 21, 20);
         ftime(&end);
         printf("Time: %u\n", (int)(1000 * (end.time - start.time) + (end.millitm - start.millitm)));
 
