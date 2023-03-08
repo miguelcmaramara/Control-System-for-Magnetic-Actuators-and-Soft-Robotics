@@ -103,10 +103,14 @@ class Drawer(QWidget):
             self.points.append(self.last_point)
             self.update()        
 
-        elif ( self.editing and 
+        elif ( self.last_click and 
         self.points[1].x() -20 <= event.pos().x() <= self.points[1].x() + 20 
         and self.points[1].y() -20 <= event.pos().y() <= self.points[1].y() + 20 
         ):
+            self.last_point = event.pos()
+            self.points.pop()
+            self.points.append(self.last_point)
+            self.update() 
             print("inna circle")
         return
      
@@ -116,7 +120,8 @@ class Drawer(QWidget):
         # self.last_point = event.pos()
 
     def mouseMoveEvent(self, event):
-        if self.last_click:
+        if ( self.last_click
+        ):
         # self.firstclick = False
             self.points.pop()
             self.last_point = event.pos()
@@ -124,10 +129,9 @@ class Drawer(QWidget):
             self.update()
 
     def mouseReleaseEvent(self, event):
-        if self.firstclick:
-            self.firstclick = not self.firstclick
-        if self.last_click:
-            self.last_click = not self.last_click
+        # if self.firstclick:
+        #     self.firstclick = not self.firstclick
+        self.last_click = True
 
 
     def paintEvent(self, event):
@@ -214,23 +218,6 @@ class Window(QMainWindow):
         self.setCentralWidget(central_widget)
         # self.setGeometry(0,0,2330, 1770)
         self.setGeometry(0,0,2000, 1600)
-
-
-        self.checkbox = QCheckBox('edit?', self)
-        self.checkbox.move(100, 700)
-        self.checkbox.stateChanged.connect(self.checkbox_state_changed)
-
-    def checkbox_state_changed(self, state):
-        self.drawer.editing = state
-        print('Checkbox state changed:', state)
-        # self.checkbox.stateChanged.connect(self.checkbox_state_changed)
-
-
-    def checkbox_state_changed(self, state):
-        print(self.checkbox.isChecked())
-
-    # def closeEvent(self, event):
-    #     print('Checkbox is checked:', self.checkbox.isChecked())
 
        
 
