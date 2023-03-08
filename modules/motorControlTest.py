@@ -18,6 +18,7 @@ def main():
     GPIO_pins = (14, 15, 18)  
     direction= 20       # Direction -> GPIO Pin
     step = 21      # Step -> GPIO Pin
+    GPIO.setmode(GPIO.BCM)
     GPIO.setup(direction, GPIO.OUT)
     GPIO.setup(step, GPIO.OUT)
     # Declare an named instance of class pass GPIO-PINs
