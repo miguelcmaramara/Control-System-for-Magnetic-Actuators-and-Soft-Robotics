@@ -44,7 +44,7 @@ class Drawer(QWidget):
         #creating variables and object to store coordinates of mouse click points and 
         #track where in the drawing process the user is
         self.points = []
-        self.firstclick = False
+        self.first_click = False
         self.last_click = False
         self.editing = False
         self.firstpoint = QPoint()
@@ -91,27 +91,32 @@ class Drawer(QWidget):
     def mousePressEvent(self, event):
         #on the first click, draw a circle showing where you clicked
         if len(self.points) == 0:
-            self.firstclick = True
-            self.firstpoint = event.pos()
-            self.points.append(self.firstpoint)
+            self.points.append(event.pos())
             self.update()
 
         #on the second click, draw line to endpoint
         elif len(self.points) == 1:
             self.last_click = True
-            self.last_point = event.pos()
-            self.points.append(self.last_point)
+            self.points.append(event.pos())
             self.update()        
 
-        elif ( self.last_click and 
+        elif ( len(self.points)  == 2 and 
         self.points[1].x() -20 <= event.pos().x() <= self.points[1].x() + 20 
         and self.points[1].y() -20 <= event.pos().y() <= self.points[1].y() + 20 
         ):
-            self.last_point = event.pos()
-            self.points.pop()
-            self.points.append(self.last_point)
+            self.last_click = True
+            self.points[1] = event.pos()
             self.update() 
-            print("inna circle")
+
+        elif ( len(self.points) == 2 and 
+        self.points[0].x() -20 <= event.pos().x() <= self.points[0].x() + 20 
+        and self.points[0].y() -20 <= event.pos().y() <= self.points[0].y() + 20 
+        ):
+            self.first_click = True
+            self.last_point = event.pos()
+        
+            self.points[0] = self.last_point
+            self.update() 
         return
      
 
@@ -120,18 +125,19 @@ class Drawer(QWidget):
         # self.last_point = event.pos()
 
     def mouseMoveEvent(self, event):
-        if ( self.last_click
-        ):
-        # self.firstclick = False
-            self.points.pop()
-            self.last_point = event.pos()
-            self.points.append(self.last_point)
+        if  self.last_click:
+            self.points[1] = event.pos()
             self.update()
 
+        elif self.first_click:
+            self.points[0] = event.pos()
+            self.update()
+
+
+
     def mouseReleaseEvent(self, event):
-        # if self.firstclick:
-        #     self.firstclick = not self.firstclick
-        self.last_click = True
+        self.last_click = False
+        
 
 
     def paintEvent(self, event):
@@ -143,7 +149,6 @@ class Drawer(QWidget):
         if self.points == []:
             return
 
-        # if self.firstclick:
         if len(self.points) == 1:
             painter.setPen(
                 QPen(
@@ -155,9 +160,8 @@ class Drawer(QWidget):
                     )
             )
         
-            painter.drawEllipse(self.firstpoint, 20, 20)
+            painter.drawEllipse(self.points[0], 20, 20)
 
-        # elif self.last_click:
         if len(self.points) == 2:
 
             painter.drawImage(QPoint(), self._image_layer)
@@ -171,7 +175,7 @@ class Drawer(QWidget):
                         Qt.RoundJoin,
                     )
             )
-            painter.drawEllipse(self.firstpoint, 20, 20)
+            painter.drawEllipse(self.points[0], 20, 20)
 
             painter.setPen(
                 QPen(
@@ -182,7 +186,7 @@ class Drawer(QWidget):
                         Qt.RoundJoin,
                     )
             )
-            painter.drawLine(self.firstpoint, self.last_point)
+            painter.drawLine(self.points[0], self.points[1])
 
             painter.setPen(
                 QPen(
@@ -194,7 +198,7 @@ class Drawer(QWidget):
                     )
             )
             
-            painter.drawEllipse(self.last_point, 20, 20)
+            painter.drawEllipse(self.points[1], 20, 20)
 
 
         painter.end()
