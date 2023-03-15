@@ -32,12 +32,14 @@
 
 import sys
 
-from PyQt5.QtCore import QPoint, Qt
+from PyQt5.QtCore import QPoint, Qt, pyqtSignal
 from PyQt5.QtGui import QBrush, QGuiApplication, QImage, QPainter, QPen, QColor
-from PyQt5.QtWidgets import *# QApplication, QMainWindow, QVBoxLayout, QWidget, QCheckBox
+from PyQt5.QtWidgets import  QApplication, QMainWindow, QVBoxLayout, QWidget, QCheckBox, QLabel, QLineEdit
 
 
 class Drawer(QWidget):
+    painted = pyqtSignal()
+
     def __init__(self, parent= None):
         super().__init__(parent)
 
@@ -46,10 +48,7 @@ class Drawer(QWidget):
         self.points = []
         self.first_click = False
         self.last_click = False
-        self.editing = False
         self.firstpoint = QPoint()
-
-        self._drawing = False
         self.last_point = QPoint()
 
         #creating Qcolor object in order to assign specific colors to widget
@@ -121,8 +120,7 @@ class Drawer(QWidget):
      
 
         
-        # self._drawing = True
-        # self.last_point = event.pos()
+    
 
     def mouseMoveEvent(self, event):
         if  self.last_click:
@@ -161,6 +159,8 @@ class Drawer(QWidget):
             )
         
             painter.drawEllipse(self.points[0], 20, 20)
+            self.painted.emit()
+
 
         if len(self.points) == 2:
 
@@ -176,6 +176,7 @@ class Drawer(QWidget):
                     )
             )
             painter.drawEllipse(self.points[0], 20, 20)
+
 
             painter.setPen(
                 QPen(
@@ -199,6 +200,8 @@ class Drawer(QWidget):
             )
             
             painter.drawEllipse(self.points[1], 20, 20)
+            self.painted.emit()
+
 
 
         painter.end()
@@ -219,9 +222,115 @@ class Window(QMainWindow):
         self.drawer.resize(1080,720)
 
 
+        # self.setCentralWidget(central_widget)
+        # # self.setGeometry(0,0,2330, 1770)
+        # self.setGeometry(0,0,2000, 1600)
+
+        self.startLabel = QLabel("Start", central_widget)
+        self.endLabel = QLabel("End", central_widget)
+
+        self.xLabel1 = QLabel("X:", central_widget)
+        self.yLabel1 = QLabel("Y:", central_widget)
+
+        self.xLabel2 = QLabel("X:", central_widget)
+        self.yLabel2 = QLabel("Y:", central_widget)
+
+        self.xLabel1.move (1200, 1150)
+        self.yLabel1.move (1200, 1250)
+
+        self.xLabel2.move (1470, 1150)
+        self.yLabel2.move (1470, 1250)
+
+
+        self.startLabel.move(1200, 1000)
+        self.startLabel.resize(200, 160)
+
+        self.endLabel.move(1500, 1000)
+        self.endLabel.resize(200, 160)
+
+        # create a line edit to allow user input
+        self.x1line_edit = QLineEdit(central_widget)
+        self.x1line_edit.move(1250, 1150)
+        self.x1line_edit.resize(100, 70)
+
+        self.y1line_edit = QLineEdit(central_widget)
+        self.y1line_edit.move(1250, 1250)
+        self.y1line_edit.resize(100, 70)
+
+
+        self.x2line_edit = QLineEdit(central_widget)
+        self.x2line_edit.move(1520, 1150)
+        self.x2line_edit.resize(100, 70)
+
+        self.y2line_edit = QLineEdit(central_widget)
+        self.y2line_edit.move(1520, 1250)
+        self.y2line_edit.resize(100, 70)
+        
+        # set the central widget for the main window
         self.setCentralWidget(central_widget)
-        # self.setGeometry(0,0,2330, 1770)
-        self.setGeometry(0,0,2000, 1600)
+
+        # set the size and position of the main window
+        self.setGeometry(0, 0, 2000, 1600)
+
+        self.drawer.painted.connect(self.updateStart)
+        
+        self.x1line_edit.textChanged.connect(lambda: self.updateLine('x1'))
+        self.y1line_edit.textChanged.connect(lambda: self.updateLine('y1'))
+        self.x2line_edit.textChanged.connect(lambda: self.updateLine('x2'))
+        self.y1line_edit.textChanged.connect(lambda: self.updateLine('y2'))
+
+
+    def updateStart(self):
+        self.x1line_edit.setText(str(self.drawer.points[0].x()))
+        self.y1line_edit.setText(str(self.drawer.points[0].y()))
+        
+        if len(self.drawer.points) > 1:
+            self.x2line_edit.setText(str(self.drawer.points[1].x()))
+            self.y2line_edit.setText(str(self.drawer.points[1].y()))
+        
+        print(self.drawer.points)
+        return
+    
+    #/////////////////////////////////////////////////////////////////////////////////////////////////////
+    #Important: as of right now, user must put start coordinates before end cooridinates if starting from 
+    #empty start and end fields. Will revise this soon
+    #////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    def updateLine(self, point):
+        self.start = QPoint()
+        self.end =  QPoint()
+        
+        if self.x1line_edit.text() != "" and self.y1line_edit.text() != "":
+            self.start.setX(int(self.x1line_edit.text()))
+            self.start.setY(int(self.y1line_edit.text()))
+            if len(self.drawer.points) > 0:
+                self.drawer.points[0] = self.start
+            else:
+                self.drawer.points.append(self.start)
+        
+        if self.x2line_edit.text() != "" and self.y2line_edit.text() != "":
+            self.end.setX(int(self.x2line_edit.text()))
+            self.end.setY(int(self.y2line_edit.text()))
+            if len(self.drawer.points) > 1:
+                self.drawer.points[1] = self.end
+            elif len(self.drawer.points) == 1:
+                self.drawer.points.append(self.end)
+        
+        
+        self.drawer.update()
+   
+        if point == 'x1':
+            print ('x1 changed')
+        if point == 'y1':
+            print ('y1 changed')
+        if point == 'x2':
+            print ('x2 changed')
+        if point == 'y2':
+            print ('y2 changed')
+
+
+
+
 
        
 
@@ -229,7 +338,10 @@ class Window(QMainWindow):
     def resizeEvent(self, event):
         # print(self.size())
         pass
-
+    
+    def mousePressEvent(self, event):
+        return
+        print(type(event.pos().x()))
 
 
 
