@@ -45,24 +45,6 @@ class DrawWidget(QWidget):
         self.update()   
         return
     def resizeEvent(self, event):
-        #///////////////////DO NOT DELETE////////////////////////////////////
-        # if (
-        #     self.size().width() > self._image_layer.width()
-        #     or self.size().height() > self._image_layer.height()
-        # ):
-        #     qimg = QImage(
-        #         max(self.size().width(), self._image_layer.width()),
-        #         max(self.size().height(), self._image_layer.height()),
-        #         QImage.Format_RGB32,
-        #     )
-        #     qimg.fill(QColor("#D0d8dc"))
-        #     painter = QPainter(qimg)
-        #     painter.drawImage(QPoint(), self._image_layer)
-        #     painter.end()
-        #     self._image_layer = qimg
-        #     self.update()
-        #///////////////////DO NOT DELETE////////////////////////////////////
-
         #This function allows for the resizing of the image layer whenever the drawing widget is resized (no real purpose as of now, comeback to this later)
         if (
             self.size().width() > self._image_layer.width()

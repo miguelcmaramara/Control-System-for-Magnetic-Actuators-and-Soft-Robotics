@@ -45,7 +45,10 @@ class UserInputs(QWidget):
         self.y2line_edit = QLineEdit()
         #self.y2line_edit.resize(100, 70)
 
+
         #Adjusting layout within userinputs widget
+
+        
         layout.addWidget(self.startLabel, 0, 0)
         layout.addWidget(self.endLabel, 0, 2)
         layout.addWidget(self.xLabel1, 1, 0)
