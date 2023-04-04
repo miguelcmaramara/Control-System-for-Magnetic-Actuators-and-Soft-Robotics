@@ -2,18 +2,25 @@ from PyQt5.QtCore import QPoint, Qt, pyqtSignal
 from PyQt5.QtGui import  QImage, QPainter, QPen, QColor
 from PyQt5.QtWidgets import  QWidget
 
+from .MotorMovement import MotorMovement
+
 
 class DrawWidget(QWidget):
     #signal object allows for function in mainwindow to be triggered upon repainting
     #"painted.emit()"
 
+   
+
     painted = pyqtSignal()
     def __init__(self, parent=None):
         super().__init__(parent)
+        
 
         #creating variables and object to store coordinates of mouse click points and 
         #track where in the drawing process the user is
-        self.points = []
+        self.MotorMovement = MotorMovement()
+        self.points = self.MotorMovement.getPoints()
+
         self.first_click = False
         self.last_click = False
         self.firstpoint = QPoint()
@@ -32,6 +39,11 @@ class DrawWidget(QWidget):
         self.circleBrushSize = 3
         self.brushColor = Qt.black
 
+    def updateSelf(self):
+        self.points = self.MotorMovement.getPoints()
+        print(self.points)
+        self.update()   
+        return
     def resizeEvent(self, event):
         #///////////////////DO NOT DELETE////////////////////////////////////
         # if (
@@ -75,12 +87,14 @@ class DrawWidget(QWidget):
         #on the first click, draw a circle showing where you clicked
         if len(self.points) == 0:
             self.points.append(event.pos())
+            self.MotorMovement.setPoints(self.points)
             self.update()
 
         #on the second click, draw line to endpoint
         elif len(self.points) == 1:
             self.last_click = True
             self.points.append(event.pos())
+            self.MotorMovement.setPoints(self.points)
             self.update()        
 
         #The following conditionals check if you are clicking wihtin a circle
@@ -91,6 +105,7 @@ class DrawWidget(QWidget):
         ):
             self.last_click = True
             self.points[1] = event.pos()
+            self.MotorMovement.setPoints(self.points)
             self.update() 
 
         elif ( len(self.points) == 2 and 
@@ -99,8 +114,8 @@ class DrawWidget(QWidget):
         ):
             self.first_click = True
             self.last_point = event.pos()
-        
             self.points[0] = self.last_point
+            self.MotorMovement.setPoints(self.points)
             self.update() 
         return
 
@@ -108,10 +123,12 @@ class DrawWidget(QWidget):
         #Allows for the click and drag adjustment of the line
         if  self.last_click:
             self.points[1] = event.pos()
+            self.MotorMovement.setPoints(self.points)
             self.update()
 
         elif self.first_click:
             self.points[0] = event.pos()
+            self.MotorMovement.setPoints(self.points)
             self.update()
 
     def mouseReleaseEvent(self, event):

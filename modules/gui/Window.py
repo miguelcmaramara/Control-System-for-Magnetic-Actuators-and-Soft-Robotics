@@ -1,129 +1,89 @@
 from PyQt5.QtCore import QPoint
 from PyQt5.QtGui import QGuiApplication
-from PyQt5.QtWidgets import  QMainWindow, QVBoxLayout, QWidget, QCheckBox, QLabel, QLineEdit
+from PyQt5.QtWidgets import  QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QGridLayout, QLabel, QPushButton, QApplication, QLineEdit
 
 from .DrawWidget import DrawWidget
+from .StartStop import StartStop
+from .UserInputs import UserInputs
+from .MotorMovement import MotorMovement
+
 
 class Window(QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
 
 
+        layout1 = QGridLayout()
         central_widget = QWidget()
-        self.DrawWidget = DrawWidget(central_widget)
-       
-        #The below code format the layout using the GridLayout class
-        #I dont think we should use it because its annoying when you try to adjust the size of widget or the window.
-        #going to proceed without it and see what happens
-        # gridlay = QGridLayout()
-        # gridlay.addWidget(self.DrawWidget, 1, 0)
-
-        # gridlay.addItem(QSpacerItem(800,800), 1, 1)
-        # gridlay.addItem(QSpacerItem(800, 800), 0, 1)
-        # gridlay.addItem(QSpacerItem(800,800), 0, 0)
-
-        # gridlay.setRowStretch(0,1)
-        # gridlay.setColumnStretch(1,1)
-
-        # central_widget.setLayout(gridlay)
-
-        self.DrawWidget.move(100,800)
-        self.DrawWidget.resize(1080,720)
-
-        #Creating labels for text input fields
-        self.startLabel = QLabel("Start", central_widget)
-        self.endLabel = QLabel("End", central_widget)
-
-        self.xLabel1 = QLabel("X:", central_widget)
-        self.yLabel1 = QLabel("Y:", central_widget)
-
-        self.xLabel2 = QLabel("X:", central_widget)
-        self.yLabel2 = QLabel("Y:", central_widget)
-
-        self.xLabel1.move (1200, 1150)
-        self.yLabel1.move (1200, 1250)
-
-        self.xLabel2.move (1470, 1150)
-        self.yLabel2.move (1470, 1250)
 
 
-        self.startLabel.move(1200, 1000)
-        self.startLabel.resize(200, 160)
+        self.WindowMotorMovement = MotorMovement()
 
-        self.endLabel.move(1500, 1000)
-        self.endLabel.resize(200, 160)
+        self.DrawWidget = DrawWidget()
 
-        # create a line edit to allow user input
-        self.x1line_edit = QLineEdit(central_widget)
-        self.x1line_edit.move(1250, 1150)
-        self.x1line_edit.resize(100, 70)
+        self.DrawWidget.MotorMovement = self.WindowMotorMovement
+        self.StartStop = StartStop()
+        self.UserInputs = UserInputs()
+        self.UserInputs.MotorMovement = self.WindowMotorMovement
 
-        self.y1line_edit = QLineEdit(central_widget)
-        self.y1line_edit.move(1250, 1250)
-        self.y1line_edit.resize(100, 70)
+        self.testinput = QLineEdit()
 
-
-        self.x2line_edit = QLineEdit(central_widget)
-        self.x2line_edit.move(1520, 1150)
-        self.x2line_edit.resize(100, 70)
-
-        self.y2line_edit = QLineEdit(central_widget)
-        self.y2line_edit.move(1520, 1250)
-        self.y2line_edit.resize(100, 70)
-
-
-        # vlay.setContentsMargins(0, 0, 0, 0)
-        # # vlay.addStretch(1)
-        # vlay.addWidget(self.DrawWidget) #,stretch=0)
-
-
-        # r = QGuiApplication.primaryScreen().availableGeometry()
         
-        #set the central widget for the main window
-        self.setCentralWidget(central_widget)
+        layout1.addWidget(self.DrawWidget, 0, 0)
+        layout1.addWidget(self.StartStop, 1, 0)
+        layout1.addWidget(self.UserInputs, 0,1)
 
-        #set the size and position of the main window
-        self.setGeometry(0,0,2000, 1600)
+        layout1.addWidget(self.testinput, 1, 1)
 
-        #connect paint signal to function that handles coordinate visualization
-        self.DrawWidget.painted.connect(self.updateStart)
+        layout1.setColumnStretch(0, 2)
+        layout1.setColumnStretch(1, 1)
 
-        #connect change in text field to function that handles redrawing drawWidget
+        # layout1.setRowStretch(3, 1)
 
-        self.x1line_edit.textChanged.connect(lambda: self.updateLine('x1'))
-        self.y1line_edit.textChanged.connect(lambda: self.updateLine('y1'))
-        self.x2line_edit.textChanged.connect(lambda: self.updateLine('x2'))
-        self.y1line_edit.textChanged.connect(lambda: self.updateLine('y2'))
 
-    def updateStart(self):
-        self.x1line_edit.setText(str(self.DrawWidget.points[0].x()))
-        self.y1line_edit.setText(str(self.DrawWidget.points[0].y()))
-        
-        if len(self.DrawWidget.points) > 1:
-            self.x2line_edit.setText(str(self.DrawWidget.points[1].x()))
-            self.y2line_edit.setText(str(self.DrawWidget.points[1].y()))
-        
 
-    def updateLine(self, point):
-        self.start = QPoint()
-        self.end =  QPoint()
-        
-        if self.x1line_edit.text() != "" and self.y1line_edit.text() != "":
-            self.start.setX(int(self.x1line_edit.text()))
-            self.start.setY(int(self.y1line_edit.text()))
-            if len(self.DrawWidget.points) > 0:
-                self.DrawWidget.points[0] = self.start
-            else:
-                self.DrawWidget.points.append(self.start)
-        
-        if self.x2line_edit.text() != "" and self.y2line_edit.text() != "":
-            self.end.setX(int(self.x2line_edit.text()))
-            self.end.setY(int(self.y2line_edit.text()))
-            if len(self.DrawWidget.points) > 1:
-                self.DrawWidget.points[1] = self.end
-            elif len(self.DrawWidget.points) == 1:
-                self.DrawWidget.points.append(self.end)
-        
-        
-        self.DrawWidget.update()
-   
+        central_widget.setLayout(layout1)
+        # self.StartStop.show()s
+
+        dim = QApplication.desktop().screenGeometry()
+
+        neww = int(dim.width() *(1/2))
+        newh = int(dim.height() *(1/2))
+
+        print(neww)
+        print(newh)
+
+        #Connecting drawwdiget paint event to updating points displayed on the window
+        self.DrawWidget.painted.connect(self.UserInputs.updateStart)
+
+        #Connecting userninputs changing text field to draw widget self.update
+        self.UserInputs.updateSignal.connect(self.DrawWidget.updateSelf)
+
+
+        #Setting drawwidget size
+        self.DrawWidget.setMaximumSize(neww, newh)
+        self.DrawWidget.setMinimumSize(neww,newh)
+
+        self.StartStop.setMaximumSize(1080, 720)
+        self.StartStop.setMinimumSize(1080,720)
+        self.setCentralWidget(central_widget)       
+
+
+        # self.DrawWidget.move(100,100)
+        # self.DrawWidget.resize(1080,720)
+
+        # widget1 = StartStop()
+        # widget2 = Widget2()
+
+        # # Create a horizontal layout and add the two widgets to it
+        # layout = QHBoxLayout()
+        # layout.addWidget(widget1)
+        # layout.addWidget(widget2)
+
+        # # Create a central widget and set its layout
+        # central_widget = QWidget()
+        # central_widget.setLayout(layout)
+
+        # # Set the central widget of the main window
+        # self.setCentralWidget(central_widget)
+
