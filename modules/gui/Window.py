@@ -1,3 +1,4 @@
+from multiprocessing.connection import Connection
 from PyQt5.QtCore import QPoint
 from PyQt5.QtGui import QGuiApplication
 from PyQt5.QtWidgets import  QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QGridLayout, QLabel, QPushButton, QApplication, QLineEdit
@@ -7,10 +8,19 @@ from .StartStop import StartStop
 from .UserInputs import UserInputs
 from .MotorMovement import MotorMovement
 
+import time
 
 class Window(QMainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, conn: Connection, parent=None):
         super().__init__(parent)
+
+        print(f"Machine status: {conn.recv()}")
+        # Testing multi-processing
+        # start_time = time.time()
+        # for i in range(1000000000):
+            # pass
+        # end_time = time.time()
+        # print(f"Parent process finished in {end_time - start_time} seconds")
 
 
         layout1 = QGridLayout()

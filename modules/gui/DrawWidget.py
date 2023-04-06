@@ -117,10 +117,20 @@ class DrawWidget(QWidget):
         self.last_click = False
 
 
+
     def paintEvent(self, event):
         painter = QPainter(self)
+
         painter.drawImage(QPoint(), self._image_layer)
 
+        self.drawLine(painter)
+        # put drawing the actual points here
+        painter.end()
+
+
+
+
+    def drawLine(self, painter):
         #prevents painting on canvas before point specification
         if self.points == []:
             painter.end()
@@ -178,6 +188,3 @@ class DrawWidget(QWidget):
             painter.drawEllipse(self.points[1], 20, 20)
             self.painted.emit()
 
-
-
-        painter.end()
