@@ -32,24 +32,23 @@
 
 import sys
 
-from PyQt5.QtCore import QPoint, Qt
+from PyQt5.QtCore import QPoint, Qt, pyqtSignal
 from PyQt5.QtGui import QBrush, QGuiApplication, QImage, QPainter, QPen, QColor
-from PyQt5.QtWidgets import *# QApplication, QMainWindow, QVBoxLayout, QWidget, QCheckBox
+from PyQt5.QtWidgets import  QApplication, QMainWindow, QVBoxLayout, QWidget, QCheckBox, QLabel, QLineEdit
 
 
 class Drawer(QWidget):
+    painted = pyqtSignal()
+
     def __init__(self, parent= None):
         super().__init__(parent)
 
         #creating variables and object to store coordinates of mouse click points and 
         #track where in the drawing process the user is
         self.points = []
-        self.firstclick = False
+        self.first_click = False
         self.last_click = False
-        self.editing = False
         self.firstpoint = QPoint()
-
-        self._drawing = False
         self.last_point = QPoint()
 
         #creating Qcolor object in order to assign specific colors to widget
@@ -91,43 +90,52 @@ class Drawer(QWidget):
     def mousePressEvent(self, event):
         #on the first click, draw a circle showing where you clicked
         if len(self.points) == 0:
-            self.firstclick = True
-            self.firstpoint = event.pos()
-            self.points.append(self.firstpoint)
+            self.points.append(event.pos())
             self.update()
 
         #on the second click, draw line to endpoint
         elif len(self.points) == 1:
             self.last_click = True
-            self.last_point = event.pos()
-            self.points.append(self.last_point)
+            self.points.append(event.pos())
             self.update()        
 
-        elif ( self.editing and 
+        elif ( len(self.points)  == 2 and 
         self.points[1].x() -20 <= event.pos().x() <= self.points[1].x() + 20 
         and self.points[1].y() -20 <= event.pos().y() <= self.points[1].y() + 20 
         ):
-            print("inna circle")
+            self.last_click = True
+            self.points[1] = event.pos()
+            self.update() 
+
+        elif ( len(self.points) == 2 and 
+        self.points[0].x() -20 <= event.pos().x() <= self.points[0].x() + 20 
+        and self.points[0].y() -20 <= event.pos().y() <= self.points[0].y() + 20 
+        ):
+            self.first_click = True
+            self.last_point = event.pos()
+        
+            self.points[0] = self.last_point
+            self.update() 
         return
      
 
         
-        # self._drawing = True
-        # self.last_point = event.pos()
+    
 
     def mouseMoveEvent(self, event):
-        if self.last_click:
-        # self.firstclick = False
-            self.points.pop()
-            self.last_point = event.pos()
-            self.points.append(self.last_point)
+        if  self.last_click:
+            self.points[1] = event.pos()
             self.update()
 
+        elif self.first_click:
+            self.points[0] = event.pos()
+            self.update()
+
+
+
     def mouseReleaseEvent(self, event):
-        if self.firstclick:
-            self.firstclick = not self.firstclick
-        if self.last_click:
-            self.last_click = not self.last_click
+        self.last_click = False
+        
 
 
     def paintEvent(self, event):
@@ -139,7 +147,6 @@ class Drawer(QWidget):
         if self.points == []:
             return
 
-        # if self.firstclick:
         if len(self.points) == 1:
             painter.setPen(
                 QPen(
@@ -151,9 +158,10 @@ class Drawer(QWidget):
                     )
             )
         
-            painter.drawEllipse(self.firstpoint, 20, 20)
+            painter.drawEllipse(self.points[0], 20, 20)
+            self.painted.emit()
 
-        # elif self.last_click:
+
         if len(self.points) == 2:
 
             painter.drawImage(QPoint(), self._image_layer)
@@ -167,7 +175,8 @@ class Drawer(QWidget):
                         Qt.RoundJoin,
                     )
             )
-            painter.drawEllipse(self.firstpoint, 20, 20)
+            painter.drawEllipse(self.points[0], 20, 20)
+
 
             painter.setPen(
                 QPen(
@@ -178,7 +187,7 @@ class Drawer(QWidget):
                         Qt.RoundJoin,
                     )
             )
-            painter.drawLine(self.firstpoint, self.last_point)
+            painter.drawLine(self.points[0], self.points[1])
 
             painter.setPen(
                 QPen(
@@ -190,7 +199,9 @@ class Drawer(QWidget):
                     )
             )
             
-            painter.drawEllipse(self.last_point, 20, 20)
+            painter.drawEllipse(self.points[1], 20, 20)
+            self.painted.emit()
+
 
 
         painter.end()
@@ -211,26 +222,115 @@ class Window(QMainWindow):
         self.drawer.resize(1080,720)
 
 
+        # self.setCentralWidget(central_widget)
+        # # self.setGeometry(0,0,2330, 1770)
+        # self.setGeometry(0,0,2000, 1600)
+
+        self.startLabel = QLabel("Start", central_widget)
+        self.endLabel = QLabel("End", central_widget)
+
+        self.xLabel1 = QLabel("X:", central_widget)
+        self.yLabel1 = QLabel("Y:", central_widget)
+
+        self.xLabel2 = QLabel("X:", central_widget)
+        self.yLabel2 = QLabel("Y:", central_widget)
+
+        self.xLabel1.move (1200, 1150)
+        self.yLabel1.move (1200, 1250)
+
+        self.xLabel2.move (1470, 1150)
+        self.yLabel2.move (1470, 1250)
+
+
+        self.startLabel.move(1200, 1000)
+        self.startLabel.resize(200, 160)
+
+        self.endLabel.move(1500, 1000)
+        self.endLabel.resize(200, 160)
+
+        # create a line edit to allow user input
+        self.x1line_edit = QLineEdit(central_widget)
+        self.x1line_edit.move(1250, 1150)
+        self.x1line_edit.resize(100, 70)
+
+        self.y1line_edit = QLineEdit(central_widget)
+        self.y1line_edit.move(1250, 1250)
+        self.y1line_edit.resize(100, 70)
+
+
+        self.x2line_edit = QLineEdit(central_widget)
+        self.x2line_edit.move(1520, 1150)
+        self.x2line_edit.resize(100, 70)
+
+        self.y2line_edit = QLineEdit(central_widget)
+        self.y2line_edit.move(1520, 1250)
+        self.y2line_edit.resize(100, 70)
+        
+        # set the central widget for the main window
         self.setCentralWidget(central_widget)
-        # self.setGeometry(0,0,2330, 1770)
-        self.setGeometry(0,0,2000, 1600)
+
+        # set the size and position of the main window
+        self.setGeometry(0, 0, 2000, 1600)
+
+        self.drawer.painted.connect(self.updateStart)
+        
+        self.x1line_edit.textChanged.connect(lambda: self.updateLine('x1'))
+        self.y1line_edit.textChanged.connect(lambda: self.updateLine('y1'))
+        self.x2line_edit.textChanged.connect(lambda: self.updateLine('x2'))
+        self.y1line_edit.textChanged.connect(lambda: self.updateLine('y2'))
 
 
-        self.checkbox = QCheckBox('edit?', self)
-        self.checkbox.move(100, 700)
-        self.checkbox.stateChanged.connect(self.checkbox_state_changed)
+    def updateStart(self):
+        self.x1line_edit.setText(str(self.drawer.points[0].x()))
+        self.y1line_edit.setText(str(self.drawer.points[0].y()))
+        
+        if len(self.drawer.points) > 1:
+            self.x2line_edit.setText(str(self.drawer.points[1].x()))
+            self.y2line_edit.setText(str(self.drawer.points[1].y()))
+        
+        print(self.drawer.points)
+        return
+    
+    #/////////////////////////////////////////////////////////////////////////////////////////////////////
+    #Important: as of right now, user must put start coordinates before end cooridinates if starting from 
+    #empty start and end fields. Will revise this soon
+    #////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    def checkbox_state_changed(self, state):
-        self.drawer.editing = state
-        print('Checkbox state changed:', state)
-        # self.checkbox.stateChanged.connect(self.checkbox_state_changed)
+    def updateLine(self, point):
+        self.start = QPoint()
+        self.end =  QPoint()
+        
+        if self.x1line_edit.text() != "" and self.y1line_edit.text() != "":
+            self.start.setX(int(self.x1line_edit.text()))
+            self.start.setY(int(self.y1line_edit.text()))
+            if len(self.drawer.points) > 0:
+                self.drawer.points[0] = self.start
+            else:
+                self.drawer.points.append(self.start)
+        
+        if self.x2line_edit.text() != "" and self.y2line_edit.text() != "":
+            self.end.setX(int(self.x2line_edit.text()))
+            self.end.setY(int(self.y2line_edit.text()))
+            if len(self.drawer.points) > 1:
+                self.drawer.points[1] = self.end
+            elif len(self.drawer.points) == 1:
+                self.drawer.points.append(self.end)
+        
+        
+        self.drawer.update()
+   
+        if point == 'x1':
+            print ('x1 changed')
+        if point == 'y1':
+            print ('y1 changed')
+        if point == 'x2':
+            print ('x2 changed')
+        if point == 'y2':
+            print ('y2 changed')
 
 
-    def checkbox_state_changed(self, state):
-        print(self.checkbox.isChecked())
 
-    # def closeEvent(self, event):
-    #     print('Checkbox is checked:', self.checkbox.isChecked())
+
 
        
 
@@ -238,7 +338,10 @@ class Window(QMainWindow):
     def resizeEvent(self, event):
         # print(self.size())
         pass
-
+    
+    def mousePressEvent(self, event):
+        return
+        print(type(event.pos().x()))
 
 
 

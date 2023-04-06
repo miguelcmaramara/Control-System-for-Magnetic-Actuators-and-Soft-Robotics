@@ -21,8 +21,6 @@ def run(sysargs):
     placement = QPoint(int(x),int(y))
 
     # print(screen_geometry)
-    print(placement)
-    print(window.width(), window.height())
 
     window.move(placement)
 
