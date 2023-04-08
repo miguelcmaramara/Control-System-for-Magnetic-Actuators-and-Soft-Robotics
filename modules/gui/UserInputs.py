@@ -87,13 +87,6 @@ class UserInputs(QWidget):
         self.setLayout(main_layout)
         # self.setLayout(layout)
 
-
-            
-        # self.x1line_edit.textChanged.connect(lambda: self.updateLine('x1'))
-        # self.y1line_edit.textChanged.connect(lambda: self.updateLine('y1'))
-        # self.x2line_edit.textChanged.connect(lambda: self.updateLine('x2'))
-        # self.y1line_edit.textChanged.connect(lambda: self.updateLine('y2'))
-
         self.x1line_edit.editingFinished.connect(lambda: self.updateLine('x1'))
         self.y1line_edit.editingFinished.connect(lambda: self.updateLine('y1'))
         self.x2line_edit.editingFinished.connect(lambda: self.updateLine('x2'))
@@ -162,39 +155,3 @@ class UserInputs(QWidget):
 
                 self.updateSignal.emit()
                 print(point)
-
-
-          
-
-        # if self.x1line_edit.text() != "" and self.y1line_edit.text() != "":
-        #     self.start.setX(int(self.x1line_edit.text()))
-        #     self.start.setY(int(self.y1line_edit.text()))
-        #     if len(self.MotorMovement.getPoints()) > 1:
-        #         self.MotorMovement.setPoints([self.start, self.MotorMovement.getPoints()[1]])
-        #     else:
-        #         self.MotorMovement.setPoints([self.start])
-        
-        # if self.x2line_edit.text() != "" and self.y2line_edit.text() != "":
-        #     self.end.setX(int(self.x2line_edit.text()))
-        #     self.end.setY(int(self.y2line_edit.text()))
-        #     self.MotorMovement.setPoints([self.MotorMovement.getPoints()[0], self.end])
-        #     if len(self.MotorMovement.getPoints()) > 1:
-        #         self.MotorMovement.setPoints([self.MotorMovement.getPoints()[0], self.end])
-           
-
-        # if self.x1line_edit.text() == "" or self.y1line_edit.text() == "":
-        #     if len(self.MotorMovement.getPoints()) > 1:
-        #         self.MotorMovement.setPoints([self.start, self.MotorMovement.getPoints()[1]])
-        #     else:
-        #         self.MotorMovement.setPoints([self.start])
-
-        # if self.x2line_edit.text() == "" or self.y2line_edit.text() == "":
-        #     if len(self.MotorMovement.getPoints()) > 1:
-        #         self.MotorMovement.setPoints([self.start, self.MotorMovement.getPoints()[1]])
-        #     else:
-        #         self.MotorMovement.setPoints([self.start])
-            
-        
-        # #Update drawer
-        # self.updateSignal.emit()
-        # self.DrawWidget_instance.update()
