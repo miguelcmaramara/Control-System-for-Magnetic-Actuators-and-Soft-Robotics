@@ -1,6 +1,6 @@
 from PyQt5.QtCore import QPoint, pyqtSignal
 from PyQt5.QtGui import QGuiApplication
-from PyQt5.QtWidgets import  QGridLayout, QWidget, QLabel, QLineEdit
+from PyQt5.QtWidgets import  QGridLayout, QWidget, QLabel, QLineEdit, QTabWidget, QVBoxLayout
 
 from .DrawWidget import DrawWidget
 from .MotorMovement import MotorMovement
@@ -11,10 +11,33 @@ class UserInputs(QWidget):
     def __init__(self, parent= None):
         super().__init__(parent)
 
-
-
         self.MotorMovement = MotorMovement()
-        layout = QGridLayout()
+
+        #initialize tab object that will contain each tab
+        self.tabs = QTabWidget()
+
+        #Each tab will be its own widget with a layout and the input fields
+        self.inputTab1 = QWidget()
+        self.inputTab2 = QWidget()
+
+        #adjusting tab size
+        self.tabs.resize(300,200)
+
+
+        #Adding tabs to tab screen
+        self.tabs.addTab(self.inputTab1, "Distance-Angle Selection")
+        self.tabs.addTab(self.inputTab2, "Start Point End Point Selection")
+        
+        #Setting layouts of tabs
+        self.inputTab1.layout1 = QGridLayout(self)
+        self.inputTab2.layout1 = QGridLayout(self)
+
+        #Creating layout for the overall userinput section
+        main_layout = QVBoxLayout()
+
+        #Adding tabs to main layout
+        main_layout.addWidget(self.tabs)
+
         
         self.startLabel = QLabel("Start")
         self.endLabel = QLabel("End")
@@ -25,43 +48,44 @@ class UserInputs(QWidget):
         self.xLabel2 = QLabel("X:")
         self.yLabel2 = QLabel("Y:")
 
-
-
-        self.startLabel.resize(200, 160)
-
-        #self.endLabel.resize(200, 160)
+        self.speedLabel = QLabel("Speed:")
+        self.oscillationLabel = QLabel("Number of Oscillations:")    
+        self.rotationLabel = QLabel("Rotations:")
+        self.frequencyLabel = QLabel("Freqiuency (Hz):")
 
         # create a line edit to allow user input
         self.x1line_edit = QLineEdit()
-        #self.x1line_edit.resize(100, 70)
-
         self.y1line_edit = QLineEdit()
-        #self.y1line_edit.resize(100, 70)
-
-
         self.x2line_edit = QLineEdit()
-        #self.x2line_edit.resize(100, 70)
-
         self.y2line_edit = QLineEdit()
-        #self.y2line_edit.resize(100, 70)
 
-
+        self.speedInput =  QLineEdit()
+        self.oscillationInput = QLineEdit()
+        self.rotationInput = QLineEdit()
+        self.frequencyInput =  QLineEdit()
         #Adjusting layout within userinputs widget
 
         
-        layout.addWidget(self.startLabel, 0, 0)
-        layout.addWidget(self.endLabel, 0, 2)
-        layout.addWidget(self.xLabel1, 1, 0)
-        layout.addWidget(self.x1line_edit, 1, 1)
-        layout.addWidget(self.yLabel1, 2, 0)
-        layout.addWidget(self.y1line_edit, 2, 1)
+        self.inputTab1.layout1.addWidget(self.startLabel, 0, 0)
+        self.inputTab1.layout1.addWidget(self.endLabel, 0, 2)
+        self.inputTab1.layout1.addWidget(self.xLabel1, 1, 0)
+        self.inputTab1.layout1.addWidget(self.x1line_edit, 1, 1)
+        self.inputTab1.layout1.addWidget(self.yLabel1, 2, 0)
+        self.inputTab1.layout1.addWidget(self.y1line_edit, 2, 1)
 
-        layout.addWidget(self.xLabel2, 1, 2)
-        layout.addWidget(self.x2line_edit, 1, 3)
-        layout.addWidget(self.yLabel2, 2, 2)
-        layout.addWidget(self.y2line_edit, 2, 3)
+        self.inputTab1.layout1.addWidget(self.xLabel2, 1, 2)
+        self.inputTab1.layout1.addWidget(self.x2line_edit, 1, 3)
+        self.inputTab1.layout1.addWidget(self.yLabel2, 2, 2)
+        self.inputTab1.layout1.addWidget(self.y2line_edit, 2, 3)
 
-        self.setLayout(layout)
+        self.inputTab1.setLayout(self.inputTab1.layout1)
+
+        main_layout.addWidget(self.tabs)
+
+        # layout2.addLayout(layout)
+        # layout2.addWidget(self.tabs)
+        self.setLayout(main_layout)
+        # self.setLayout(layout)
 
 
             

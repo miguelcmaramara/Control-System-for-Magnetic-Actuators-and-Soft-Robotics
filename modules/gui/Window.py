@@ -26,17 +26,20 @@ class Window(QMainWindow):
         self.UserInputs = UserInputs()
         self.UserInputs.MotorMovement = self.WindowMotorMovement
 
+        
+
         self.testinput = QLineEdit()
 
         
         layout1.addWidget(self.DrawWidget, 0, 0)
         layout1.addWidget(self.StartStop, 1, 0)
         layout1.addWidget(self.UserInputs, 0,1)
+    
 
         layout1.addWidget(self.testinput, 1, 1)
 
-        layout1.setColumnStretch(0, 2)
-        layout1.setColumnStretch(1, 1)
+        # layout1.setColumnStretch(0, 2)
+        # layout1.setColumnStretch(1, 1)
 
         # layout1.setRowStretch(3, 1)
 
