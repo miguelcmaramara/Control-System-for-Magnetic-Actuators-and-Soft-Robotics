@@ -18,11 +18,12 @@ def run(sysargs):
     x = (screen_geometry.width()-window.width()) / 2
     y = (screen_geometry.height()-window.height()) / 2
 
+    
     placement = QPoint(int(x),int(y))
 
     # print(screen_geometry)
 
-    window.move(placement)
+    window.move(x,y)
 
     window.show()
     app.exec()

@@ -50,7 +50,8 @@ class UserInputs(QWidget):
 
         self.speedLabel = QLabel("Speed:")
         self.oscillationLabel = QLabel("Number of Oscillations:")    
-        self.rotationLabel = QLabel("Rotations:")
+        self.startRotationLabel = QLabel("Starting Angle: ")
+        self.endRotationLabel = QLabel("Ending Angle: ")
         self.frequencyLabel = QLabel("Freqiuency (Hz):")
 
         # create a line edit to allow user input
@@ -61,13 +62,15 @@ class UserInputs(QWidget):
 
         self.speedInput =  QLineEdit()
         self.oscillationInput = QLineEdit()
-        self.rotationInput = QLineEdit()
-        self.frequencyInput =  QLineEdit()
-        #Adjusting layout within userinputs widget
+        self.startRotationInput = QLineEdit()
+        self.endRotationInput = QLineEdit()
 
-        
+        self.frequencyInput =  QLineEdit()
+
+        #Adjusting layout within tab1 
         self.inputTab1.layout1.addWidget(self.startLabel, 0, 0)
         self.inputTab1.layout1.addWidget(self.endLabel, 0, 2)
+
         self.inputTab1.layout1.addWidget(self.xLabel1, 1, 0)
         self.inputTab1.layout1.addWidget(self.x1line_edit, 1, 1)
         self.inputTab1.layout1.addWidget(self.yLabel1, 2, 0)
@@ -78,19 +81,27 @@ class UserInputs(QWidget):
         self.inputTab1.layout1.addWidget(self.yLabel2, 2, 2)
         self.inputTab1.layout1.addWidget(self.y2line_edit, 2, 3)
 
-        self.inputTab1.setLayout(self.inputTab1.layout1)
+        self.inputTab1.layout1.addWidget(self.startRotationLabel, 3, 0)
+        self.inputTab1.layout1.addWidget(self.startRotationInput, 3, 1)
 
+        self.inputTab1.layout1.addWidget(self.endRotationLabel, 3,2)
+        self.inputTab1.layout1.addWidget(self.endRotationInput, 3,3)
+        
+       
+        self.inputTab1.setLayout(self.inputTab1.layout1)
         main_layout.addWidget(self.tabs)
 
-        # layout2.addLayout(layout)
-        # layout2.addWidget(self.tabs)
+    
         self.setLayout(main_layout)
-        # self.setLayout(layout)
 
-        self.x1line_edit.editingFinished.connect(lambda: self.updateLine('x1'))
-        self.y1line_edit.editingFinished.connect(lambda: self.updateLine('y1'))
-        self.x2line_edit.editingFinished.connect(lambda: self.updateLine('x2'))
-        self.y2line_edit.editingFinished.connect(lambda: self.updateLine('y2'))
+        #when done editing update the path parameters and redraw the line
+        self.x1line_edit.editingFinished.connect(lambda: self.updatePathParameters('x1'))
+        self.y1line_edit.editingFinished.connect(lambda: self.updatePathParameters('y1'))
+        self.x2line_edit.editingFinished.connect(lambda: self.updatePathParameters('x2'))
+        self.y2line_edit.editingFinished.connect(lambda: self.updatePathParameters('y2'))
+
+        self.startRotationInput.editingFinished.connect(lambda: self.updatePathParameters('r1'))
+        self.endRotationInput.editingFinished.connect(lambda: self.updatePathParameters('r2'))
 
 
     #Get show coordinates based on line drawn with mouse
@@ -104,7 +115,7 @@ class UserInputs(QWidget):
             self.y2line_edit.setText(str(self.MotorMovement.getPoints()[1].y()))
     
     #Draw line based on coordinates typed into text field
-    def updateLine(self,point):
+    def updatePathParameters(self,point):
         self.start = QPoint()
         self.end =  QPoint()
         
@@ -120,7 +131,6 @@ class UserInputs(QWidget):
                     self.MotorMovement.setPoints([self.start])
                 
                 self.updateSignal.emit()
-                print(point)
 
         if self.y1line_edit.text() != "":
             self.start.setY(int(self.y1line_edit.text()))
@@ -134,7 +144,6 @@ class UserInputs(QWidget):
                     self.MotorMovement.setPoints([self.start])
                 
                 self.updateSignal.emit()
-                print(point)
 
         if self.x2line_edit.text() != "":
             self.end.setX(int(self.x2line_edit.text()))
@@ -144,7 +153,6 @@ class UserInputs(QWidget):
                 self.MotorMovement.setPoints([self.MotorMovement.getPoints()[0], self.end])
                 
                 self.updateSignal.emit()
-                print(point)
 
         if self.y2line_edit.text() != "":
             self.end.setY(int(self.y2line_edit.text()))
@@ -154,4 +162,7 @@ class UserInputs(QWidget):
                 self.MotorMovement.setPoints([self.MotorMovement.getPoints()[0], self.end])
 
                 self.updateSignal.emit()
-                print(point)
+        
+        if point == 'r1':
+            pass
+            # self.MotorMovement.
