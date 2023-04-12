@@ -15,6 +15,7 @@ class Window(QMainWindow):
         super().__init__(parent)
 
         print(f"Machine status: {conn.recv()}")
+        self.conn = conn
         # Testing multi-processing
         # start_time = time.time()
         # for i in range(1000000000):
@@ -32,7 +33,7 @@ class Window(QMainWindow):
         self.DrawWidget = DrawWidget()
 
         self.DrawWidget.MotorMovement = self.WindowMotorMovement
-        self.StartStop = StartStop()
+        self.StartStop = StartStop(self.conn)
         self.UserInputs = UserInputs()
         self.UserInputs.MotorMovement = self.WindowMotorMovement
 
