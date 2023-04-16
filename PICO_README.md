@@ -6,3 +6,4 @@
 - File that you intend to run on pico must be named main.py
 - Check the "all commands" tab at the bottom of the page to see all commands including uploading code to pico
 
+
