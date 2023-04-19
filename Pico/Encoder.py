@@ -2,15 +2,17 @@ from machine import Pin
 import time
 
 class encoder:
-    def __init__(self, pin_A, pin_B, pin_X):
+    def __init__(self, pin_A, pin_B, pin_X = None):
         # allows for empty Stepper_motor
         self.Encoder_Count = 0
-        if pin_A< 0 and pin_B < 0 and pin_X < 0:
+        if pin_A< 0 and pin_B < 0 and pin_X is not None and pin_X < 0:
             return
         
         self.pin_A = Pin(pin_A, mode=Pin.IN)
         self.pin_B = Pin(pin_B, mode=Pin.IN)
-        self.pin_X = Pin(pin_X, mode=Pin.IN)
+        
+        if pin_X is not None:
+            self.pin_X = Pin(pin_X, mode=Pin.IN)
 
         # # setmode if not set already
         # if(GPIO.getmode() is None):
@@ -33,7 +35,7 @@ class encoder:
         else:
             self.Encoder_Count -= 1
 
-        print(self.Encoder_Count)
+        return self.Encoder_Count
 
     # def do_Index(self, channel):
        # global Encoder_Count
