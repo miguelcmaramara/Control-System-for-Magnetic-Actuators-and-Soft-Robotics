@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QPoint, Qt, pyqtSignal
+from PyQt5.QtCore import QPoint, Qt, pyqtSignal, QPointF
 from PyQt5.QtGui import  QImage, QPainter, QPen, QColor
 from PyQt5.QtWidgets import  QWidget
 
@@ -23,8 +23,8 @@ class DrawWidget(QWidget):
 
         self.first_click = False
         self.last_click = False
-        self.firstpoint = QPoint()
-        self.last_point = QPoint()
+        self.firstpoint = QPointF()
+        self.last_point = QPointF()
 
         #creating Qcolor object in order to assign specific colors to widget
         color = QColor("#D0d8dc")
@@ -38,6 +38,8 @@ class DrawWidget(QWidget):
         self.brushSize = 7
         self.circleBrushSize = 3
         self.brushColor = Qt.black
+        self.startColor = Qt.green
+        self.endColor = Qt.red
 
     def updateSelf(self):
         self.points = self.MotorMovement.getPoints()
@@ -68,34 +70,34 @@ class DrawWidget(QWidget):
     def mousePressEvent(self, event):
         #on the first click, draw a circle showing where you clicked
         if len(self.points) == 0:
-            self.points.append(event.pos())
+            self.points.append(event.pos()/self.scale)
             self.MotorMovement.setPoints(self.points)
             self.update()
 
         #on the second click, draw line to endpoint
         elif len(self.points) == 1:
             self.last_click = True
-            self.points.append(event.pos())
+            self.points.append(event.pos()/self.scale)
             self.MotorMovement.setPoints(self.points)
             self.update()        
 
         #The following conditionals check if you are clicking wihtin a circle
         #This allows for easy line adjustment
         elif ( len(self.points)  == 2 and 
-        self.points[1].x() -20 <= event.pos().x() <= self.points[1].x() + 20 
-        and self.points[1].y() -20 <= event.pos().y() <= self.points[1].y() + 20 
+        self.points[1].x()*self.scale -20 <= event.pos().x() <= self.points[1].x()*self.scale + 20 
+        and self.points[1].y()*self.scale -20 <= event.pos().y() <= self.points[1].y()*self.scale + 20 
         ):
             self.last_click = True
-            self.points[1] = event.pos()
+            self.points[1] = event.pos()/self.scale
             self.MotorMovement.setPoints(self.points)
             self.update() 
 
         elif ( len(self.points) == 2 and 
-        self.points[0].x() -20 <= event.pos().x() <= self.points[0].x() + 20 
-        and self.points[0].y() -20 <= event.pos().y() <= self.points[0].y() + 20 
+        self.points[0].x()*self.scale -20 <= event.pos().x() <= self.points[0].x()*self.scale + 20 
+        and self.points[0].y()*self.scale -20 <= event.pos().y() <= self.points[0].y()*self.scale + 20 
         ):
             self.first_click = True
-            self.last_point = event.pos()
+            self.last_point = event.pos()/self.scale
             self.points[0] = self.last_point
             self.MotorMovement.setPoints(self.points)
             self.update() 
@@ -103,23 +105,40 @@ class DrawWidget(QWidget):
 
     def mouseMoveEvent(self, event):
         #Allows for the click and drag adjustment of the line
-        if  self.last_click:
-            self.points[1] = event.pos()
+        if  self.last_click: #and event.pos().x()<350*self.scale and event.pos().y()<275*self.scale and event.pos().x()>0 and event.pos().y()>0:
+            self.points[1] = event.pos()/self.scale
+            if event.pos().x()>350*self.scale:
+                self.points[1].setX(350)
+            elif event.pos().x()<0:
+                self.points[1].setX(0)
+            if event.pos().y()>275*self.scale:
+                self.points[1].setY(275)
+            elif event.pos().y()<0:
+                self.points[1].setY(0)
             self.MotorMovement.setPoints(self.points)
             self.update()
 
-        elif self.first_click:
-            self.points[0] = event.pos()
+        elif self.first_click: #and event.pos().x()<350*self.scale and event.pos().y()<275*self.scale and event.pos().x()>0 and event.pos().y()>0:
+            self.points[0] = event.pos()/self.scale
+            if event.pos().x()>350*self.scale:
+                self.points[0].setX(350)
+            elif event.pos().x()<0:
+                self.points[0].setX(0)
+            if event.pos().y()>275*self.scale:
+                self.points[0].setY(275)
+            elif event.pos().y()<0:
+                self.points[0].setY(0)
             self.MotorMovement.setPoints(self.points)
             self.update()
 
     def mouseReleaseEvent(self, event):
         self.last_click = False
+        self.first_click = False
 
 
     def paintEvent(self, event):
         painter = QPainter(self)
-        painter.drawImage(QPoint(), self._image_layer)
+        painter.drawImage(QPointF(), self._image_layer)
 
         #prevents painting on canvas before point specification
         if self.points == []:
@@ -130,29 +149,29 @@ class DrawWidget(QWidget):
         if len(self.points) == 1:
             painter.setPen(
                 QPen(
-                        self.brushColor,
+                        self.startColor,
                         self.circleBrushSize,
                         Qt.SolidLine,
                         Qt.RoundCap,
                         Qt.RoundJoin,
                     )
             )
-            painter.drawEllipse(self.points[0], 20, 20)
+            painter.drawEllipse(self.points[0]*self.scale, 20, 20)
             self.painted.emit()
 
         #draws remaining line and ending point
         if len(self.points) == 2:
-            painter.drawImage(QPoint(), self._image_layer)
+            painter.drawImage(QPointF(), self._image_layer)
             painter.setPen(
                 QPen(
-                        self.brushColor,
+                        self.startColor,
                         self.circleBrushSize,
                         Qt.SolidLine,
                         Qt.RoundCap,
                         Qt.RoundJoin,
                     )
             )
-            painter.drawEllipse(self.points[0], 20, 20)
+            painter.drawEllipse(self.points[0]*self.scale, 20, 20)
 
             painter.setPen(
                 QPen(
@@ -163,11 +182,11 @@ class DrawWidget(QWidget):
                         Qt.RoundJoin,
                     )
             )
-            painter.drawLine(self.points[0], self.points[1])
+            painter.drawLine(self.points[0]*self.scale, self.points[1]*self.scale)
 
             painter.setPen(
                 QPen(
-                        self.brushColor,
+                        self.endColor,
                         self.circleBrushSize,
                         Qt.SolidLine,
                         Qt.RoundCap,
@@ -175,9 +194,11 @@ class DrawWidget(QWidget):
                     )
             )
             
-            painter.drawEllipse(self.points[1], 20, 20)
+            painter.drawEllipse(self.points[1]*self.scale, 20, 20)
             self.painted.emit()
 
 
 
         painter.end()
+    def setScale(self,s):
+        self.scale = s

@@ -1,6 +1,6 @@
 from PyQt5.QtCore import QPoint
 from PyQt5.QtGui import QGuiApplication
-from PyQt5.QtWidgets import  QMainWindow, QPushButton, QWidget, QVBoxLayout, QHBoxLayout, QCheckBox, QLabel, QLineEdit
+from PyQt5.QtWidgets import  QMainWindow, QPushButton, QWidget, QVBoxLayout, QGridLayout, QCheckBox, QLabel, QLineEdit
 
 from .DrawWidget import DrawWidget
 # from .Window import Window
@@ -14,12 +14,16 @@ class StartStop(QWidget):
         
         self.startButton = QPushButton('START')
         self.stopButton = QPushButton('STOP')
+        self.returnHomeButton = QPushButton('RETURN TO HOME')
+        self.moveButton = QPushButton('GO TO START POSITION')
 
         
 
-        layout = QHBoxLayout()
-        layout.addWidget(self.startButton)
-        layout.addWidget(self.stopButton)
+        layout = QGridLayout()
+        layout.addWidget(self.startButton,1,1)
+        layout.addWidget(self.stopButton,1,2)
+        layout.addWidget(self.returnHomeButton,2,1)
+        layout.addWidget(self.moveButton,2,2)
 
         # # Create the button
         # button = QPushButton("Button 1")
