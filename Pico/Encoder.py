@@ -1,5 +1,6 @@
 from machine import Pin
 import time
+# from write import writeSteps
 
 class encoder:
     def __init__(self, pin_A, pin_B, pin_X = None):
@@ -18,11 +19,13 @@ class encoder:
         # if(GPIO.getmode() is None):
         #     GPIO.setmode(GPIO.BOARD)
         
+
+        
         self.pin_A.irq(trigger=self.pin_A.IRQ_FALLING, handler= self.do_Encoder) #Interrupt
         # self.pin_X.irq(trigger=self.pin_X.IRQ_FALLING, handler= self.do_Index)  #Index interrupt
 
 
-    def do_Encoder(self, channel):
+    def do_Encoder(self, channel= None):
         # how global last
         # if(time.time_ns() - last < 3000):
             # return
@@ -50,6 +53,8 @@ class encoder:
     def reset_steps(self, pin= None):
         print("encoder_count reset")
         self.Encoder_Count = 0
+
+    
 
 
 
