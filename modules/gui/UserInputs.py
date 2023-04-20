@@ -22,7 +22,7 @@ class UserInputs(QWidget):
         self.inputTab2 = QWidget()
 
         #adjusting tab size
-        self.tabs.resize(300,200)
+        self.tabs.resize(50,50)
 
 
         #Adding tabs to tab screen
@@ -44,23 +44,23 @@ class UserInputs(QWidget):
         self.startLabel2 = QLabel("Start Point")
         self.endLabel = QLabel("End Point")
 
-        self.xLabel1 = QLabel("X:")
-        self.yLabel1 = QLabel("Y:")
+        self.xLabel1 = QLabel("X (mm):")
+        self.yLabel1 = QLabel("Y (mm):")
 
-        self.xLabel2 = QLabel("X:")
-        self.yLabel2 = QLabel("Y:")
+        self.xLabel2 = QLabel("X (mm):")
+        self.yLabel2 = QLabel("Y (mm):")
 
-        self.xLabel3 = QLabel("X:")
-        self.yLabel3 = QLabel("Y:")
+        self.xLabel3 = QLabel("X (mm):")
+        self.yLabel3 = QLabel("Y (mm):")
 
-        self.speedLabel = QLabel("Speed:")
+        self.speedLabel = QLabel("Speed (mm/s):")
         self.oscillationLabel = QLabel("Number of Oscillations:")    
         self.startRotationLabel = QLabel("Starting Angle: ")
         self.endRotationLabel = QLabel("Ending Angle: ")
         self.frequencyLabel = QLabel("Freqiuency (Hz):")
 
-        self.distanceLabel = QLabel("Path Distance")
-        self.pathAngleLabel = QLabel("Path Angle")
+        self.distanceLabel = QLabel("Path Distance:")
+        self.pathAngleLabel = QLabel("Path Angle:")
 
         # create a line edit to allow user input
         self.x1line_edit = QDoubleSpinBox()
@@ -157,8 +157,9 @@ class UserInputs(QWidget):
         self.distanceInput.editingFinished.connect(lambda: self.updatePathParameters("distance"))
         self.pathAngleInput.editingFinished.connect(lambda: self.updatePathParameters("distance"))
 
-        #self.startRotationInput.editingFinished.connect(lambda: self.validateNum(self.startRotationInput, -90,90))
-        #self.endRotationInput.editingFinished.connect(lambda: self.validateNum(self.endRotationInput, -90,90))
+        self.startRotationInput.editingFinished.connect(lambda: self.MotorMovement.setRot([self.startRotationInput.value(),self.endRotationInput.value()]))
+        self.endRotationInput.editingFinished.connect(lambda: self.MotorMovement.setRot([self.startRotationInput.value(),self.endRotationInput.value()]))
+
 
         self.speedInput.editingFinished.connect(lambda: self.updateSpeed('speed'))
         self.frequencyInput.editingFinished.connect(lambda: self.updateSpeed("freq"))
@@ -174,10 +175,11 @@ class UserInputs(QWidget):
         if len(self.MotorMovement.getPoints()) > 1:
             self.x2line_edit.setValue((self.MotorMovement.getPoints()[1].x()))
             self.y2line_edit.setValue((self.MotorMovement.getPoints()[1].y()))
-            distance = round(((self.MotorMovement.getPoints()[0].x()-self.MotorMovement.getPoints()[1].x())**2+(self.MotorMovement.getPoints()[0].y()-self.MotorMovement.getPoints()[1].y())**2)**.5,2)
+            distance = ((self.MotorMovement.getPoints()[0].x()-self.MotorMovement.getPoints()[1].x())**2+(self.MotorMovement.getPoints()[0].y()-self.MotorMovement.getPoints()[1].y())**2)**.5
             self.distanceInput.setValue((distance))
-            angle = round(atan2((self.MotorMovement.getPoints()[0].y()-self.MotorMovement.getPoints()[1].y()),(self.MotorMovement.getPoints()[1].x()-self.MotorMovement.getPoints()[0].x()))*180/pi,2)
+            angle = atan2((self.MotorMovement.getPoints()[0].y()-self.MotorMovement.getPoints()[1].y()),(self.MotorMovement.getPoints()[1].x()-self.MotorMovement.getPoints()[0].x()))*180/pi
             self.pathAngleInput.setValue((angle))
+            self.updateSpeed("speed") 
 
 
     def updateSpeed(self,field):
@@ -187,6 +189,7 @@ class UserInputs(QWidget):
             elif(field=="freq"):
                 self.speedInput.setValue((float(self.distanceInput.text())*float(self.frequencyInput.text())*2))
                 self.frequencyInput.setValue((float(self.speedInput.text())/(2*float(self.distanceInput.text()))))
+        self.MotorMovement.setSpeed(self.speedInput.value())
 
     #Draw line based on coordinates typed into text field
     def updatePathParameters(self,point):
@@ -196,20 +199,19 @@ class UserInputs(QWidget):
             self.start.setX(float(self.x1line_edit.text()))
             self.start.setY(float(self.y1line_edit.text()))
             self.end.setX(float(self.x2line_edit.text()))
-            self.end.setY(float(self.y2line_edit.text()))
-            self.MotorMovement.setPoints([self.start, self.end])    
+            self.end.setY(float(self.y2line_edit.text()))   
         elif point=="distance":
             self.start.setX(float(self.x3line_edit.text()))
             self.start.setY(float(self.y3line_edit.text()))
-            self.validateNum(self.distanceInput,0,self.getMaxDistance())
-            x2 = round(self.MotorMovement.getPoints()[0].x()+(float(self.distanceInput.text())*cos(float(self.pathAngleInput.text())*pi/180)),1)
-            y2 = round(self.MotorMovement.getPoints()[0].y()-(float(self.distanceInput.text())*sin(float(self.pathAngleInput.text())*pi/180)),1)
+            self.validateNum(self.distanceInput,0,self.getMaxDistance(self.start))
+            x2 = self.start.x()+(self.distanceInput.value()*cos(self.pathAngleInput.value()*pi/180))
+            y2 = self.start.y()-(self.distanceInput.value()*sin(self.pathAngleInput.value()*pi/180))
             self.end.setX(x2)
             self.end.setY(y2)
-            self.MotorMovement.setPoints([self.start, self.end])  
+        self.MotorMovement.setPoints([self.start, self.end])
         self.updateSignal.emit()
 
-    def getMaxDistance(self):
+    def getMaxDistance(self,point):
         x1=0
         y2=0
         x2=0
@@ -222,19 +224,19 @@ class UserInputs(QWidget):
         v2=800
         v1=800
         if(angle ==0 or angle ==360 or angle==-360):
-            v1=350-self.MotorMovement.getPoints()[0].x()
+            v1=350-point.x()
         elif (angle ==180 or angle ==-180):
-            v1=self.MotorMovement.getPoints()[0].x()
+            v1=point.x()
         elif (angle ==90 or angle ==-270):
-            v2=self.MotorMovement.getPoints()[0].y()
+            v2=point.y()
         elif (angle ==270 or angle ==-90):
-            v2=275-self.MotorMovement.getPoints()[0].y()
+            v2=275-point.y()
         else:
-            x2=(self.MotorMovement.getPoints()[0].y()-y2)/tan(angle*pi/180)
-            v2= ((x2)**2+(self.MotorMovement.getPoints()[0].y()-y2)**2)**.5
-            y1=(self.MotorMovement.getPoints()[0].x()-x1)*tan(angle*pi/180)
-            v1= ((self.MotorMovement.getPoints()[0].x()-x1)**2+(y1)**2)**.5
-        return min(self.distanceInput.value(),v1,v2)
+            x2=(point.y()-y2)/tan(angle*pi/180)
+            v2= ((x2)**2+(point.y()-y2)**2)**.5
+            y1=(point.x()-x1)*tan(angle*pi/180)
+            v1= ((point.x()-x1)**2+(y1)**2)**.5
+        return min(v1,v2)
     def validateNum(self, input, start, stop):
         value = float(input.text())
         if(value > stop):

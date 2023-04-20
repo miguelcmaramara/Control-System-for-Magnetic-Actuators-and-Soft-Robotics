@@ -20,10 +20,10 @@ class StartStop(QWidget):
         
 
         layout = QGridLayout()
-        layout.addWidget(self.startButton,1,1)
-        layout.addWidget(self.stopButton,1,2)
-        layout.addWidget(self.returnHomeButton,2,1)
-        layout.addWidget(self.moveButton,2,2)
+        layout.addWidget(self.startButton,0,0)
+        layout.addWidget(self.stopButton,0,1)
+        layout.addWidget(self.returnHomeButton,1,0)
+        layout.addWidget(self.moveButton,1,1)
 
         # # Create the button
         # button = QPushButton("Button 1")
