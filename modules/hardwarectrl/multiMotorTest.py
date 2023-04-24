@@ -120,6 +120,26 @@ def motorGoBrrr(dir:int, step:int, clockwise:bool, num:int,delay:float):
         time.sleep(delay)
 
 def main():
+    #pins as specified in the fritzing diagram:
+    # v_mot_a_dir_pin = 37
+    # v_mot_a_step_pin = 35
+    # v_mot_b_dir_pin = 28
+    # v_mot_b_step_pin = 32
+    # v_mot_mode0_pin = 36
+    # v_mot_mode1_pin = 38
+    # v_mot_mode2_pin = 40
+    
+    # h_mot_dir_pin = 24
+    # h_mot_step_pin = 26
+    # h_mot_mode0_pin = 7
+    # h_mot_mode1_pin = 12
+    # h_mot_mode2_pin = 22
+
+    # r_mot_dir_pin = 33
+    # r_mot_step_pin = 31
+    
+    
+
     h_mot_step_pin = 35
     h_mot_dir_pin = 36
     v_mot_step_pin = 37
