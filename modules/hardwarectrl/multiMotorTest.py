@@ -1,95 +1,37 @@
 import time
 import RPi.GPIO as GPIO
+from .stepper_motor import Stepper_motor
 #from RpiMotorLib import RpiMotorLib
 
 
-
-class Stepper_motor:
-
-    def __init__(self, step_pin:int = -1, dir_pin: int = -1):
-        # running logistics varibles
-        self.step_pin = step_pin
-        self.dir_pin = dir_pin
-        self.dir = 1    # 1 = CCW, 0 = CW
-        self.step = 0    # 1 = CCW, 0 = CW
-
-        # timing variables
-        self.delay = 100    # arbitrary initial value
-        self.last = 0
-
-        
-        # allows for empty Stepper_motor
-        if step_pin < 0 and dir_pin < 0:
-            return
-        # setmode if not set already
-        if(GPIO.getmode() is None):
-            GPIO.setmode(GPIO.BOARD)
-        GPIO.setup(step_pin, GPIO.OUT)
-        GPIO.setup(dir_pin, GPIO.OUT)
-    
-    def write_dir(self, dir:int = -1): 
-        if self.dir_pin < 0:
-            return
-
-        if dir < 0:     # if no arg provided, flip direction
-            self.dir = 0 if self.dir == 1 else 1
-        elif dir == 0:
-            self.dir = 0    # if 0, set 0
-        else:
-            self.dir = 1    # if positive, set to 1
-
-        GPIO.output(self.dir_pin, self.dir)
-
-    def write_step(self, step:int = -1): 
-        if self.step_pin < 0:
-            return
-
-        if step < 0:    # if no arg provided, flip direction
-            self.step = 0 if self.step == 1 else 1
-        elif step == 0:
-            self.step = 0    # if 0, set 0
-        else:
-            self.step = 1    # if positive, set to 1
-        GPIO.output(self.step_pin, self.step)
-
-    def check_del(self, curr_time: int):
-        if curr_time - self.last < self.delay:
-            return
-
-        self.last += self.delay
-        self.write_step()
-        # self.write_step()
-
-    def reset_last(self):
-        self.last = 0
-
+# 8 = 1/8 step size
 class Motor_controller:
     
     def __init__(
             self, 
-            h_mot: Stepper_motor,
-            v_mot_A: Stepper_motor,
-            v_mot_B: Stepper_motor,
+            h_mot_l: Stepper_motor,
+            h_mot_h: Stepper_motor,
+            v_mot: Stepper_motor,
             r_mot: Stepper_motor,
         ):
-        self.h_mot = h_mot
-        self.v_mot_A = v_mot_A
-        self.v_mot_B = v_mot_B
+        self.h_mot_l = h_mot_l
+        self.h_mot_h = h_mot_h
+        self.v_mot = v_mot
         self.r_mot = r_mot
 
     def run(self, move_cmd: list[tuple[int, int, int, int, int]]):
-        # delay tuple is in following order: h_mot, v_mot_A, v_mot_B, r_mot time del
+        # delay tuple is in following order: h_mot_l, h_mot_h, v_mot, r_mot time del
         # time del is the amount of time that it's active
         for delay_tup in move_cmd:
             start = time.time_ns()
-            self.h_mot.delay = delay_tup[0]
-            self.v_mot_A.delay = delay_tup[1]
-            self.v_mot_B.delay = delay_tup[2]
+            self.h_mot_l.delay = delay_tup[0]
+            self.h_mot_h.delay = delay_tup[1]
+            self.v_mot.delay = delay_tup[2]
             self.r_mot.delay = delay_tup[3]
 
-            self.h_mot.reset_last()
-            self.v_mot_A.reset_last()
-            self.v_mot_B.reset_last()
+            self.h_mot_l.reset_last()
+            self.h_mot_h.reset_last()
+            self.v_mot.reset_last()
             self.r_mot.reset_last()
 
             print(delay_tup)
@@ -99,10 +41,30 @@ class Motor_controller:
                 if now > delay_tup[4]:
                     break
 
-                self.h_mot.check_del(int(now))
-                self.v_mot_A.check_del(int(now))
-                self.v_mot_B.check_del(int(now))
+                self.h_mot_l.check_del(int(now))
+                self.h_mot_h.check_del(int(now))
+                self.v_mot.check_del(int(now))
                 self.r_mot.check_del(int(now))
+    
+
+    def print_current_positions(self):
+        print(f"h_mot_l position: {self.h_mot_l.num_steps}")
+        print(f"h_mot_h position: {self.h_mot_h.num_steps}")
+        print(f"v_mot position: {self.v_mot.num_steps}")
+        print(f"r_mot position: {self.r_mot.num_steps}")
+
+    def set_actives(self, val:int=1):
+        self.h_mot_l.set_active(val)
+        self.h_mot_h.set_active(val)
+        self.v_mot.set_active(val)
+        self.r_mot.set_active(val)
+
+    # sets enable and standby on all
+    def set_en_sb(self, val:int=1):
+        self.h_mot_l.write_standby(val)
+        self.h_mot_h.write_standby(val)
+        self.v_mot.write_standby(val)
+        self.r_mot.write_enable(val)
 
 
 
