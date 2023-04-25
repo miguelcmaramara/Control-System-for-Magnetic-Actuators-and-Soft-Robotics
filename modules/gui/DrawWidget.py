@@ -111,8 +111,8 @@ class DrawWidget(QWidget):
                 self.points[1].setX(350)
             elif event.pos().x()<0:
                 self.points[1].setX(0)
-            if event.pos().y()>275*self.scale:
-                self.points[1].setY(275)
+            if event.pos().y()>260*self.scale:
+                self.points[1].setY(260)
             elif event.pos().y()<0:
                 self.points[1].setY(0)
             self.MotorMovement.setPoints(self.points)
@@ -124,8 +124,8 @@ class DrawWidget(QWidget):
                 self.points[0].setX(350)
             elif event.pos().x()<0:
                 self.points[0].setX(0)
-            if event.pos().y()>275*self.scale:
-                self.points[0].setY(275)
+            if event.pos().y()>260*self.scale:
+                self.points[0].setY(260)
             elif event.pos().y()<0:
                 self.points[0].setY(0)
             self.MotorMovement.setPoints(self.points)

@@ -57,9 +57,9 @@ class Window(QMainWindow):
         #Setting drawwidget size
         #self.DrawWidget.setMaximumSize(neww, newh)
         #self.DrawWidget.setMinimumSize(neww,newh)
-        scale = min(neww/350, newh/275)
-        self.DrawWidget.setMaximumSize(350*scale, 275*scale)
-        self.DrawWidget.setMinimumSize(350*scale,275*scale)
+        scale = min(neww/350, newh/260)
+        self.DrawWidget.setMaximumSize(350*scale, 260*scale)
+        self.DrawWidget.setMinimumSize(350*scale,260*scale)
         self.DrawWidget.setScale(scale)
 
         #self.StartStop.setMaximumSize(1080, 720)

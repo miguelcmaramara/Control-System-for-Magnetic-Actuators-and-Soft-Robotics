@@ -66,15 +66,15 @@ class UserInputs(QWidget):
         self.x1line_edit = QDoubleSpinBox()
         self.x1line_edit.setRange(0,350) 
         self.y1line_edit = QDoubleSpinBox()
-        self.y1line_edit.setRange(0,275)  
+        self.y1line_edit.setRange(0,260)  
         self.x2line_edit = QDoubleSpinBox()
         self.x2line_edit.setRange(0,350)  
         self.y2line_edit = QDoubleSpinBox()
-        self.y2line_edit.setRange(0,275) 
+        self.y2line_edit.setRange(0,260) 
         self.x3line_edit = QDoubleSpinBox()
         self.x3line_edit.setRange(0,350) 
         self.y3line_edit = QDoubleSpinBox()
-        self.y3line_edit.setRange(0,275) 
+        self.y3line_edit.setRange(0,260) 
 
         self.speedInput =  QDoubleSpinBox()
         self.speedInput.setRange(0,250) 
@@ -218,7 +218,7 @@ class UserInputs(QWidget):
         y1=0
         angle = self.pathAngleInput.value()
         if ((angle>180)or(angle>-180 and angle<0)):
-            y2=275
+            y2=260
         if ((angle>-90 and angle<90)or (angle<-270)or(angle>270)):
             x1=350
         v2=800
@@ -230,7 +230,7 @@ class UserInputs(QWidget):
         elif (angle ==90 or angle ==-270):
             v2=point.y()
         elif (angle ==270 or angle ==-90):
-            v2=275-point.y()
+            v2=260-point.y()
         else:
             x2=(point.y()-y2)/tan(angle*pi/180)
             v2= ((x2)**2+(point.y()-y2)**2)**.5
