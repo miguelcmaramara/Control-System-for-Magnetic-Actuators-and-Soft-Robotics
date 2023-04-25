@@ -1,12 +1,14 @@
+from multiprocessing.connection import Connection
 from PyQt5.QtCore import QPoint
 from PyQt5.QtGui import QGuiApplication
 from PyQt5.QtWidgets import  QMainWindow, QPushButton, QWidget, QVBoxLayout, QGridLayout, QCheckBox, QLabel, QLineEdit
+from ..shared.machinestatus import MachineStatus
 
 from .DrawWidget import DrawWidget
 # from .Window import Window
 
 class StartStop(QWidget):
-    def __init__(self, parent= None):
+    def __init__(self, conn: Connection, parent= None):
         super().__init__(parent)
 
 
@@ -14,6 +16,7 @@ class StartStop(QWidget):
         
         self.startButton = QPushButton('START')
         self.stopButton = QPushButton('STOP')
+        self.conn = conn
         self.returnHomeButton = QPushButton('RETURN TO HOME')
         self.moveButton = QPushButton('GO TO START POSITION')
 
@@ -40,4 +43,6 @@ class StartStop(QWidget):
     
     def mousePressEvent(self,event):
         print("Clicking in startstop")
+        # Trigger run function
+        self.conn.send(MachineStatus.RUNNING)
         return
