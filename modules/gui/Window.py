@@ -37,29 +37,23 @@ class Window(QMainWindow):
         self.UserInputs = UserInputs()
         self.UserInputs.MotorMovement = self.WindowMotorMovement
 
-        self.testinput = QLineEdit()
+        
+
 
         
         layout1.addWidget(self.DrawWidget, 0, 0)
         layout1.addWidget(self.StartStop, 1, 0)
-        layout1.addWidget(self.UserInputs, 0,1)
-
-        layout1.addWidget(self.testinput, 1, 1)
-
-        layout1.setColumnStretch(0, 2)
-        layout1.setColumnStretch(1, 1)
-
-        # layout1.setRowStretch(3, 1)
+        layout1.addWidget(self.UserInputs, 0,1, -1,1)
+    
 
 
 
         central_widget.setLayout(layout1)
-        # self.StartStop.show()s
 
         dim = QApplication.desktop().screenGeometry()
 
         neww = int(dim.width() *(1/2))
-        newh = int(dim.height() *(1/2))
+        newh = int(dim.height() *(2/3))
 
         print(neww)
         print(newh)
@@ -72,29 +66,15 @@ class Window(QMainWindow):
 
 
         #Setting drawwidget size
-        self.DrawWidget.setMaximumSize(neww, newh)
-        self.DrawWidget.setMinimumSize(neww,newh)
+        #self.DrawWidget.setMaximumSize(neww, newh)
+        #self.DrawWidget.setMinimumSize(neww,newh)
+        scale = min(neww/350, newh/260)
+        self.DrawWidget.setMaximumSize(350*scale, 260*scale)
+        self.DrawWidget.setMinimumSize(350*scale,260*scale)
+        self.DrawWidget.setScale(scale)
 
-        self.StartStop.setMaximumSize(1080, 720)
-        self.StartStop.setMinimumSize(1080,720)
+        #self.StartStop.setMaximumSize(1080, 720)
+        #self.StartStop.setMinimumSize(1080,720)
         self.setCentralWidget(central_widget)       
 
-
-        # self.DrawWidget.move(100,100)
-        # self.DrawWidget.resize(1080,720)
-
-        # widget1 = StartStop()
-        # widget2 = Widget2()
-
-        # # Create a horizontal layout and add the two widgets to it
-        # layout = QHBoxLayout()
-        # layout.addWidget(widget1)
-        # layout.addWidget(widget2)
-
-        # # Create a central widget and set its layout
-        # central_widget = QWidget()
-        # central_widget.setLayout(layout)
-
-        # # Set the central widget of the main window
-        # self.setCentralWidget(central_widget)
 

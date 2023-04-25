@@ -1,7 +1,7 @@
 from multiprocessing.connection import Connection
 from PyQt5.QtCore import QPoint
 from PyQt5.QtGui import QGuiApplication
-from PyQt5.QtWidgets import  QMainWindow, QPushButton, QWidget, QVBoxLayout, QHBoxLayout, QCheckBox, QLabel, QLineEdit
+from PyQt5.QtWidgets import  QMainWindow, QPushButton, QWidget, QVBoxLayout, QGridLayout, QCheckBox, QLabel, QLineEdit
 from ..shared.machinestatus import MachineStatus
 
 from .DrawWidget import DrawWidget
@@ -17,12 +17,16 @@ class StartStop(QWidget):
         self.startButton = QPushButton('START')
         self.stopButton = QPushButton('STOP')
         self.conn = conn
+        self.returnHomeButton = QPushButton('RETURN TO HOME')
+        self.moveButton = QPushButton('GO TO START POSITION')
 
         
 
-        layout = QHBoxLayout()
-        layout.addWidget(self.startButton)
-        layout.addWidget(self.stopButton)
+        layout = QGridLayout()
+        layout.addWidget(self.startButton,0,0)
+        layout.addWidget(self.stopButton,0,1)
+        layout.addWidget(self.returnHomeButton,1,0)
+        layout.addWidget(self.moveButton,1,1)
 
         # # Create the button
         # button = QPushButton("Button 1")

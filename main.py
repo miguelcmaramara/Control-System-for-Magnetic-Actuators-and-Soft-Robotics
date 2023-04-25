@@ -6,8 +6,8 @@ if __name__ == '__main__':
 
 
     # from modules import multiMotorTest
-    # sys.exit(App.run(sys.argv))
     # multiMotorTest.main()
+
     # from modules import motorControlTest
     # motorControlTest.main()
 
