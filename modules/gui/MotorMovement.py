@@ -15,14 +15,16 @@ class MotorMovement():
         self.points = point_array
         return 
     
-    def getSpeed(self, angle_array):
-        return
+    def getSpeed(self):
+        return self.speed
     def setSpeed(self, speed):
+        self.speed = speed
         return
 
-    def getRot():
-        return
-    def setRot():
+    def getRot(self):
+        return self.rotationAngle
+    def setRot(self, angle):
+        self.rotationAngle = angle
         return
     
     

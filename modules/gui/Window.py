@@ -29,10 +29,9 @@ class Window(QMainWindow):
         self.UserInputs.MotorMovement = self.WindowMotorMovement
 
         
-        #add widgets to layout
         layout1.addWidget(self.DrawWidget, 0, 0)
         layout1.addWidget(self.StartStop, 1, 0)
-        layout1.addWidget(self.UserInputs, 0,1)
+        layout1.addWidget(self.UserInputs, 0,1, -1,1)
     
 
 
@@ -43,7 +42,7 @@ class Window(QMainWindow):
         dim = QApplication.desktop().screenGeometry()
 
         neww = int(dim.width() *(1/2))
-        newh = int(dim.height() *(1/2))
+        newh = int(dim.height() *(2/3))
 
         print(neww)
         print(newh)
@@ -56,11 +55,15 @@ class Window(QMainWindow):
 
 
         #Setting drawwidget size
-        self.DrawWidget.setMaximumSize(neww, newh)
-        self.DrawWidget.setMinimumSize(neww,newh)
+        #self.DrawWidget.setMaximumSize(neww, newh)
+        #self.DrawWidget.setMinimumSize(neww,newh)
+        scale = min(neww/350, newh/260)
+        self.DrawWidget.setMaximumSize(350*scale, 260*scale)
+        self.DrawWidget.setMinimumSize(350*scale,260*scale)
+        self.DrawWidget.setScale(scale)
 
-        self.StartStop.setMaximumSize(1080, 720)
-        self.StartStop.setMinimumSize(1080,720)
+        #self.StartStop.setMaximumSize(1080, 720)
+        #self.StartStop.setMinimumSize(1080,720)
         self.setCentralWidget(central_widget)       
 
 

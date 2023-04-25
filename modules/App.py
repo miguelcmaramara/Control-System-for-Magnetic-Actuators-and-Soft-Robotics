@@ -15,15 +15,10 @@ def run(sysargs):
     window = Window()
 
     screen_geometry = app.desktop().screenGeometry()
-    x = (screen_geometry.width()-window.width()) / 2
-    y = (screen_geometry.height()-window.height()) / 2
+    #x = (screen_geometry.width()-window.width()) / 2
+    #y = (screen_geometry.height()-window.height()) / 2
 
-    
-    placement = QPoint(int(x),int(y))
-
-    # print(screen_geometry)
-
-    window.move(x,y)
+    window.move(0,0)
 
     window.show()
     app.exec()
