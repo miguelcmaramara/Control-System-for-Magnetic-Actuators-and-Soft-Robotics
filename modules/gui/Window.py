@@ -24,10 +24,12 @@ class Window(QMainWindow):
         # print(f"Parent process finished in {end_time - start_time} seconds")
 
 
+        #setting layout
         layout1 = QGridLayout()
+
+
+        #initializing widgets
         central_widget = QWidget()
-
-
         self.WindowMotorMovement = MotorMovement()
 
         self.DrawWidget = DrawWidget()
@@ -38,18 +40,16 @@ class Window(QMainWindow):
         self.UserInputs.MotorMovement = self.WindowMotorMovement
 
         
-
-
-        
         layout1.addWidget(self.DrawWidget, 0, 0)
         layout1.addWidget(self.StartStop, 1, 0)
         layout1.addWidget(self.UserInputs, 0,1, -1,1)
     
 
 
-
+        #set layout
         central_widget.setLayout(layout1)
 
+        
         dim = QApplication.desktop().screenGeometry()
 
         neww = int(dim.width() *(1/2))
