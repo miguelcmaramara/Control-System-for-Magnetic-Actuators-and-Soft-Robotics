@@ -192,6 +192,58 @@ class UserInputs(QWidget):
         self.MotorMovement.setSpeed(self.speedInput.value())
 
     #Draw line based on coordinates typed into text field
+    def updateLine(self,point):
+        self.start = QPoint()
+        self.end =  QPoint()
+        
+        if self.x1line_edit.text() != "":
+            self.start.setX(int(self.x1line_edit.text()))
+
+            if self.y1line_edit.text() != "":
+                self.start.setY(int(self.y1line_edit.text()))
+                
+                if len(self.MotorMovement.getPoints()) > 1:
+                    self.MotorMovement.setPoints([self.start, self.MotorMovement.getPoints()[1]])
+                else:
+                    self.MotorMovement.setPoints([self.start])
+                
+                self.updateSignal.emit()
+                print(point)
+
+        if self.y1line_edit.text() != "":
+            self.start.setY(int(self.y1line_edit.text()))
+
+            if self.x1line_edit.text() != "":
+                self.start.setX(int(self.x1line_edit.text()))
+                
+                if len(self.MotorMovement.getPoints()) > 1:
+                    self.MotorMovement.setPoints([self.start, self.MotorMovement.getPoints()[1]])
+                else:
+                    self.MotorMovement.setPoints([self.start])
+                
+                self.updateSignal.emit()
+                print(point)
+
+        if self.x2line_edit.text() != "":
+            self.end.setX(int(self.x2line_edit.text()))
+
+            if self.y2line_edit.text() != "":
+                self.end.setY(int(self.y2line_edit.text()))
+                self.MotorMovement.setPoints([self.MotorMovement.getPoints()[0], self.end])
+                
+                self.updateSignal.emit()
+                print(point)
+
+        if self.y2line_edit.text() != "":
+            self.end.setY(int(self.y2line_edit.text()))
+
+            if self.x2line_edit.text() != "":
+                self.end.setX(int(self.x2line_edit.text()))
+                self.MotorMovement.setPoints([self.MotorMovement.getPoints()[0], self.end])
+
+                self.updateSignal.emit()
+                print(point)
+
     def updatePathParameters(self,point):
         self.start = QPointF()
         self.end =  QPointF()

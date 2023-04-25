@@ -136,10 +136,19 @@ class DrawWidget(QWidget):
         self.first_click = False
 
 
+
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.drawImage(QPointF(), self._image_layer)
 
+        self.drawLine(painter)
+        # put drawing the actual points here
+        painter.end()
+
+
+
+
+    def drawLine(self, painter):
         #prevents painting on canvas before point specification
         if self.points == []:
             painter.end()
@@ -198,7 +207,7 @@ class DrawWidget(QWidget):
             self.painted.emit()
 
 
-
         painter.end()
+
     def setScale(self,s):
         self.scale = s
