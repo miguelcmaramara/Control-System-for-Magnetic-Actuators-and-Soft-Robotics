@@ -20,6 +20,10 @@ class StartStop(QWidget):
         self.returnHomeButton = QPushButton('RETURN TO HOME')
         self.moveButton = QPushButton('GO TO START POSITION')
 
+        self.startButton.clicked.connect(self.startPressEvent)
+        self.stopButton.clicked.connect(self.stopPressEvent)
+        self.returnHomeButton.clicked.connect(self.homePressEvent)
+        self.moveButton.clicked.connect(self.returnStartPressEvent)
         
 
         layout = QGridLayout()
@@ -45,4 +49,23 @@ class StartStop(QWidget):
         print("Clicking in startstop")
         # Trigger run function
         self.conn.send(MachineStatus.RUNNING)
+        return
+
+    def startPressEvent(self):
+
+        #Trigger run function
+        self.conn.send(MachineStatus.RUNNING)
+        return
+    
+    def stopPressEvent(self):
+        
+        self.conn.send(MachineStatus.OFF)
+        return
+    
+    def homePressEvent(self):
+        self.conn.send(MachineStatus.HOME)
+        return
+    
+    def returnStartPressEvent(self):
+        self.conn.send(MachineStatus.GOPOS)
         return
