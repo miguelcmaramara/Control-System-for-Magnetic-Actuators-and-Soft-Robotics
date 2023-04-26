@@ -3,7 +3,7 @@ from PyQt5.QtCore import QPoint
 from .gui.Window import Window
 import multiprocessing as mp
 # from multiprocessing import Process, Pipe, get_context
-from .machinehandler.machinehandler import MachineHandler
+#from .machinehandler.machinehandler import MachineHandler
 import configparser
 import os
 
@@ -24,14 +24,14 @@ def run(sysargs):
 
     try:
         # FE/BE communiations
-        mp.set_start_method('fork')
+        #mp.set_start_method('fork')
         parent_conn, child_conn = mp.Pipe()
 
         # create BackEnd
-        mhandler = MachineHandler(config, child_conn)#, child_conn)
-        be = mp.Process(target=mhandler.run)
+        #mhandler = MachineHandler(config, child_conn)#, child_conn)
+        #be = mp.Process(target=mhandler.run)
 
-        be.start()
+       # be.start()
 
         # create FrontEnd
         app = QApplication(sysargs)
@@ -39,17 +39,17 @@ def run(sysargs):
         screen_geometry = app.desktop().screenGeometry()
 
         # Initialize FrontEnd
-        x = (screen_geometry.width()-window.width()) / 2
-        y = (screen_geometry.height()-window.height()) / 2
-        placement = QPoint(int(x),int(y))
-        window.move(placement)
+        #x = (screen_geometry.width()-window.width()) / 2
+        #y = (screen_geometry.height()-window.height()) / 2
+        #placement = QPoint(int(x),int(y))
+        window.move(0,0)
         window.show()
         # print(screen_geometry)
 
         app.exec()
     except KeyboardInterrupt:
-        be.close()
+        #be.close()
         app.exit(0)
-    be.close()
+    #be.close()
     app.exit(0)
 

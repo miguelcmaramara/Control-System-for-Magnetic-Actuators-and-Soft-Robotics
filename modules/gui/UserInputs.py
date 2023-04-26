@@ -1,6 +1,7 @@
 from PyQt5.QtCore import QPoint, pyqtSignal, QPointF,QRegExp, QLocale
 from PyQt5.QtGui import QGuiApplication, QDoubleValidator, QIntValidator, QRegExpValidator
 from PyQt5.QtWidgets import  QGridLayout, QWidget, QLabel, QLineEdit, QTabWidget, QVBoxLayout, QDoubleSpinBox, QSpinBox
+from pyqt_switch import PyQtSwitch
 
 from .DrawWidget import DrawWidget
 from .MotorMovement import MotorMovement
@@ -61,6 +62,9 @@ class UserInputs(QWidget):
 
         self.distanceLabel = QLabel("Path Distance:")
         self.pathAngleLabel = QLabel("Path Angle:")
+        self.motorEnableLabel =QLabel("Rotation Motor Locked")
+        self.motorDisableLabel =QLabel("Rotation Motor Unlocked")
+
 
         # create a line edit to allow user input
         self.x1line_edit = QDoubleSpinBox()
@@ -94,7 +98,8 @@ class UserInputs(QWidget):
         self.pathAngleInput.setRange(-360,360) 
 
 
-
+        self.enableRotSwitch = PyQtSwitch()
+        self.enableRotSwitch.setAnimation(True)
 
 
         #Adjusting layout within tab1 
@@ -142,6 +147,9 @@ class UserInputs(QWidget):
 
         main_layout.addWidget(self.oscillationLabel, 3, 0,1,1)
         main_layout.addWidget(self.oscillationInput, 3, 1,1,1)
+        main_layout.addWidget(self.motorEnableLabel, 4, 0, 1,1)
+        main_layout.addWidget(self.enableRotSwitch,4,1,1,1)
+        main_layout.addWidget(self.motorDisableLabel,4,2,1,1)
 
     
         self.setLayout(main_layout)
@@ -159,6 +167,7 @@ class UserInputs(QWidget):
 
         self.startRotationInput.editingFinished.connect(lambda: self.MotorMovement.setRot([self.startRotationInput.value(),self.endRotationInput.value()]))
         self.endRotationInput.editingFinished.connect(lambda: self.MotorMovement.setRot([self.startRotationInput.value(),self.endRotationInput.value()]))
+        self.enableRotSwitch.toggled.connect(lambda: self.MotorMovement.toggleEnableRot())
 
 
         self.speedInput.editingFinished.connect(lambda: self.updateSpeed('speed'))
@@ -295,3 +304,4 @@ class UserInputs(QWidget):
             input.setValue((stop))
         elif(value<start):
             input.setValue((start))
+    

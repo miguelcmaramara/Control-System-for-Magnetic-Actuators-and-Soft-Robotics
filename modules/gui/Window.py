@@ -14,7 +14,7 @@ class Window(QMainWindow):
     def __init__(self, conn: Connection, parent=None):
         super().__init__(parent)
 
-        print(f"Machine status: {conn.recv()}")
+        #print(f"Machine status: {conn.recv()}")
         self.conn = conn
         # Testing multi-processing
         # start_time = time.time()
