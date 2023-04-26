@@ -115,7 +115,7 @@ class Stepper_motor:
     
     # writes a HIGH or LOW pulse to dir pin depending on the dir input
     def write_dir(self, dir:int = -1): 
-        if active == 0: # don't write if inactive
+        if self.active == 0: # don't write if inactive
             return
         if self.dir_pin < 0:
             return
@@ -194,11 +194,17 @@ class Stepper_motor:
     # write the stepper mode. pass in the step size dictionary.
     # this function determines the number of step size
     def write_modes(self, mode_tup:tuple[int] = (0,0,0)): 
-        if self.sb_pin < 0:
+
+        if self.en_pin >=0:
             # TMC2209
-            GPIO.output(self.mode_0_pin, mode_tup[0])
-            GPIO.output(self.mode_1_pin, mode_tup[1])
-        else:
+            #check if any pin has been initialized. If not, then resolution is fixed and nothing should happen
+            if self.mode_0_pin == -1:
+                pass
+            else:
+                GPIO.output(self.mode_0_pin, mode_tup[0])
+                GPIO.output(self.mode_1_pin, mode_tup[1])
+
+        else:   
             # the bigger motor driver
             GPIO.output(self.mode_0_pin, mode_tup[0])
             GPIO.output(self.mode_1_pin, mode_tup[1])
