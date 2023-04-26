@@ -4,6 +4,7 @@ class MotorMovement():
         self.points  = []
         self.speed = 0
         self.rotationAngle = []
+        self.enableRot = True
 
     def getPoints(self):
         # print("getting points")
@@ -27,4 +28,7 @@ class MotorMovement():
         self.rotationAngle = angle
         return
     
-    
+    def getEnableRot(self):
+        return self.enableRot
+    def toggleEnableRot(self):
+        self.enableRot = not self.enableRot
