@@ -170,7 +170,7 @@ class Motor_controller:
     def move(self, force_index = -1, force_cmd: list[tuple[int, int, int, int, int]] = None):
         curr_cmd = self.move_cmds[self.curr_move]
         if force_index >= 0:
-            curr_cmd = move_cmds[force_index]
+            curr_cmd = self.move_cmds[force_index]
         elif force_cmd is not None:
             curr_cmd = force_cmd
         else:
@@ -374,10 +374,10 @@ def main():
     controls = [
             # (300000, 250000, 5000, 5000, 50000000),
             # (10000000, 250000, 5000, 5000, 100000000),
-            (med, slo, 5000, 5000, time),
-            (slo, med, 5000, 5000, time),
-            (med, slo, 5000, 5000, time),
-            (slo, med, 5000, 5000, time),
+            (600000, slo, 5000, 5000, time *4)
+            # (slo, med, 5000, 5000, time),
+            # (med, slo, 5000, 5000, time),
+            # (slo, med, 5000, 5000, time),
             ]
 
 

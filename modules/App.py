@@ -2,8 +2,8 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QPoint
 from .gui.Window import Window
 import multiprocessing as mp
-# from multiprocessing import Process, Pipe, get_context
-#from .machinehandler.machinehandler import MachineHandler
+from multiprocessing import Process, Pipe, get_context
+from .machinehandler.machinehandler import MachineHandler
 import configparser
 import os
 
@@ -24,14 +24,14 @@ def run(sysargs):
 
     try:
         # FE/BE communiations
-        #mp.set_start_method('fork')
+        mp.set_start_method('fork')
         parent_conn, child_conn = mp.Pipe()
 
         # create BackEnd
-        #mhandler = MachineHandler(config, child_conn)#, child_conn)
-        #be = mp.Process(target=mhandler.run)
+        mhandler = MachineHandler(config, child_conn)#, child_conn)
+        be = mp.Process(target=mhandler.run)
 
-       # be.start()
+        be.start()
 
         # create FrontEnd
         app = QApplication(sysargs)
@@ -48,8 +48,8 @@ def run(sysargs):
 
         app.exec()
     except KeyboardInterrupt:
-        #be.close()
+        be.close()
         app.exit(0)
-    #be.close()
+    be.close()
     app.exit(0)
 

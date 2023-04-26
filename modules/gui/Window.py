@@ -35,7 +35,7 @@ class Window(QMainWindow):
         self.DrawWidget = DrawWidget()
 
         self.DrawWidget.MotorMovement = self.WindowMotorMovement
-        self.StartStop = StartStop(self.conn)
+        self.StartStop = StartStop(self.conn, self.WindowMotorMovement)
         self.UserInputs = UserInputs()
         self.UserInputs.MotorMovement = self.WindowMotorMovement
 

@@ -70,9 +70,11 @@ class Stepper_motor:
         # setup pins
         GPIO.setup(step_pin, GPIO.OUT)
         GPIO.setup(dir_pin, GPIO.OUT)
-
-        GPIO.setup(mode_0_pin, GPIO.OUT)
-        GPIO.setup(mode_1_pin, GPIO.OUT)
+        
+        if(mode_0_pin >= 0):
+            GPIO.setup(mode_0_pin, GPIO.OUT)
+        if(mode_1_pin >= 0):
+            GPIO.setup(mode_1_pin, GPIO.OUT)
         if(mode_2_pin >= 0):
             GPIO.setup(mode_2_pin, GPIO.OUT)
         if(en_pin >= 0):
@@ -80,6 +82,7 @@ class Stepper_motor:
         if(sb_pin >= 0):
             GPIO.setup(sb_pin, GPIO.OUT)
         if(limit_switch >= 0):
+            print(f"SETUP pin {limit_switch}")
             GPIO.setup(limit_switch, GPIO.IN)
 
         # tmc2209
@@ -93,13 +96,16 @@ class Stepper_motor:
 
     # sets the value of the the active flag (used for controlling movement
     def set_active(self, val:int=1):
-        print(f"HERE active = {self.active}")
+        print(f"HERE active = {self.active}, switch = {self.limit_switch}")
+        print(f"HERE active = {self.active}, switch = {self.limit_switch}, state = {GPIO.input(self.limit_switch)}")
         self.active = val
         print("HERE")
 
 
     # adds an event detector for the limit switch
     def set_limit_action(self, set=1, fxn=None, sig_type=GPIO.RISING):
+        print(f"HERE active = {self.active}, switch = {self.limit_switch}")
+
         callback = lambda channel:  self.set_active(val=0)       # default value of callback function
         if sig_type == GPIO.FALLING:
             callback = lambda channel: self.set_active(val=1)   # second value of callback function
@@ -107,9 +113,10 @@ class Stepper_motor:
         if fxn is not None:
             callback = fxn
         if(set):
+            GPIO.setup(self.limit_switch, GPIO.IN)
             GPIO.add_event_detect(self.limit_switch, sig_type, callback=callback)
         else:   # if not set, then unset
-            GPIO.remove_event_det(self.limit_switch)
+            GPIO.remove_event_detect(self.limit_switch)
         
 
     

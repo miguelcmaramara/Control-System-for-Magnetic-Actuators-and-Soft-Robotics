@@ -8,12 +8,12 @@ from .DrawWidget import DrawWidget
 # from .Window import Window
 
 class StartStop(QWidget):
-    def __init__(self, conn: Connection, parent= None):
+    def __init__(self, conn: Connection, motor_move=None, parent= None):
         super().__init__(parent)
 
 
         # DrawWidget_instance = DrawWidget()
-        
+        self.motor_movement = motor_move
         self.startButton = QPushButton('START')
         self.stopButton = QPushButton('STOP')
         self.conn = conn
@@ -48,7 +48,7 @@ class StartStop(QWidget):
     def mousePressEvent(self,event):
         print("Clicking in startstop")
         # Trigger run function
-        self.conn.send(MachineStatus.RUNNING)
+        #self.conn.send(MachineStatus.RUNNING)
         return
 
     def startPressEvent(self):
@@ -68,4 +68,5 @@ class StartStop(QWidget):
     
     def returnStartPressEvent(self):
         self.conn.send(MachineStatus.GOPOS)
+        self.conn.send(self.motor_movement)
         return
