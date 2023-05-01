@@ -32,7 +32,7 @@ def run(sysargs):
         be = mp.Process(target=mhandler.run)
 
         be.start()
-
+    
         # create FrontEnd
         app = QApplication(sysargs)
         window = Window(parent_conn)

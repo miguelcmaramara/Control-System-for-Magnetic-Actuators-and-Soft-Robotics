@@ -10,7 +10,7 @@ class MachineStatus(Enum):
     HOME = 5
     GOPOS = 6
     TOGGLEROT = 7
-
-    
+    DEBUG = 8
+    KILL =9
 
 

@@ -1,4 +1,3 @@
-from machine import Pin, UART
 from time import sleep
 from Encoder import encoder
 # from write import writeSteps
@@ -77,5 +76,5 @@ while True:
                 run_state = False
             
         
-    # pin.toggle()
-    # sleep(1)
+    pin.toggle()
+    sleep(1)
