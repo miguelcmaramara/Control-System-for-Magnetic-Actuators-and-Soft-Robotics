@@ -1,22 +1,22 @@
 import time
 import RPi.GPIO as GPIO
-
+import math
 
 # mode pins for controlling step size
 MODE_STEP_TO_PIN_TMC2209 = {
         8: (0, 0),
         16: (1, 1),
-        32: (0, 1),
-        64: (1, 0)
+        32: (1, 0),
+        64: (0, 1)
         }
 MODE_STEP_TO_PIN_TB67S128FTG = {
         1: (0, 0, 0),
-        2: (0, 0, 1),
+        2: (1, 0, 0),
         4: (0, 1, 0),
-        8: (0, 1, 1),
-        16: (1, 0, 0),
+        8: (1, 1, 0),
+        16: (0, 0, 1),
         32: (1, 0, 1),
-        64: (1, 1, 0),
+        64: (0, 1, 1),
         128: (1, 1, 1)
         }
 
@@ -59,6 +59,7 @@ class Stepper_motor:
         self.delay = 100    # arbitrary initial value
         self.last = 0       # previous time delayed, set to 0
 
+        self.step_size = 8
         
         # allows for empty Stepper_motor
         if step_pin < 0 and dir_pin < 0:
@@ -83,15 +84,15 @@ class Stepper_motor:
             GPIO.setup(sb_pin, GPIO.OUT)
         if(limit_switch >= 0):
             print(f"SETUP pin {limit_switch}")
-            GPIO.setup(limit_switch, GPIO.IN)
+            GPIO.setup(limit_switch, GPIO.IN, GPIO.PUD_DOWN)
 
         # tmc2209
         if(en_pin >= 0):
-            self.write_modes(MODE_STEP_TO_PIN_TMC2209[8])
+            self.write_modes(8)
             self.write_enable(self.enable)
         if(sb_pin >= 0):
             self.write_standby(self.standby)
-            self.write_modes(MODE_STEP_TO_PIN_TB67S128FTG[4])
+            self.write_modes(4)
 
 
     # sets the value of the the active flag (used for controlling movement
@@ -101,13 +102,15 @@ class Stepper_motor:
         self.active = val
         print("HERE")
 
+    def get_active(self):
+        return self.active
 
     # adds an event detector for the limit switch
     def set_limit_action(self, set=1, fxn=None, sig_type=GPIO.RISING):
         print(f"HERE active = {self.active}, switch = {self.limit_switch}")
 
         callback = lambda channel:  self.set_active(val=0)       # default value of callback function
-        if sig_type == GPIO.FALLING:
+        if sig_type == GPIO.RISING:
             callback = lambda channel: self.set_active(val=1)   # second value of callback function
 
         if fxn is not None:
@@ -121,15 +124,15 @@ class Stepper_motor:
 
     
     # writes a HIGH or LOW pulse to dir pin depending on the dir input
-    def write_dir(self, dir:int = -1): 
+    def write_dir(self, dir:int = -2): 
         if self.active == 0: # don't write if inactive
             return
         if self.dir_pin < 0:
             return
 
-        if dir < 0:     # if no arg provided, flip direction
+        if dir < -1:     # if no arg provided, flip direction
             self.dir = 0 if self.dir == 1 else 1
-        elif dir == 0:
+        elif dir == 0 or dir==-1:
             self.dir = 0    # if 0, set 0
         else:
             self.dir = 1    # if positive, set to 1
@@ -142,17 +145,25 @@ class Stepper_motor:
             return
 
         if step < 0:    # if no arg provided, write the opposite of previous step
-            self.step = 0 if self.step == 1 else 1
+            if self.step ==0:
+                self.step=1
+                if self.dir==0:
+                    self.num_steps-=1
+                else:
+                    self.num_steps+=1
+            else:
+                self.step=0
+            #self.step = 0 if self.step == 1 else 1
         elif step == 0:
             self.step = 0    # if 0, set 0
         else:
             self.step = 1    # if positive, set to 1
 
-        # increment number of steps for the pin number
-        if self.step == 0:
-            self.num_steps = self.num_steps - 1
-        else:
-            self.num_steps = self.num_steps + 1
+            # increment number of steps for the pin number
+        #if self.dir == 0:
+        #    self.num_steps = self.num_steps - 1
+        #else:
+        #    self.num_steps = self.num_steps + 1
         
         GPIO.output(self.step_pin, self.step)
 
@@ -176,9 +187,9 @@ class Stepper_motor:
         if enable < 0:    # if no arg provided, flip direction
             self.enable = 0 if self.enable == 1 else 1
         elif enable == 0:
-            self.enable = 0    # if 0, set 0
+            self.enable = 1    # if 0, set 0
         else:
-            self.enable = 1    # if positive, set to 1
+            self.enable = 0    # if positive, set to 1
 
         
         GPIO.output(self.en_pin, self.enable)
@@ -200,19 +211,21 @@ class Stepper_motor:
 
     # write the stepper mode. pass in the step size dictionary.
     # this function determines the number of step size
-    def write_modes(self, mode_tup:tuple[int] = (0,0,0)): 
-
+    def write_modes(self, dict_Value:int): 
+        self.step_size =dict_Value
         if self.en_pin >=0:
             # TMC2209
             #check if any pin has been initialized. If not, then resolution is fixed and nothing should happen
             if self.mode_0_pin == -1:
                 pass
             else:
+                mode_tup = MODE_STEP_TO_PIN_TMC2209[dict_Value]
                 GPIO.output(self.mode_0_pin, mode_tup[0])
                 GPIO.output(self.mode_1_pin, mode_tup[1])
 
         else:   
             # the bigger motor driver
+            mode_tup = MODE_STEP_TO_PIN_TB67S128FTG[dict_Value]
             GPIO.output(self.mode_0_pin, mode_tup[0])
             GPIO.output(self.mode_1_pin, mode_tup[1])
             GPIO.output(self.mode_2_pin, mode_tup[2])
@@ -222,6 +235,15 @@ class Stepper_motor:
     # last time that motor should have moved.
     # this should be called before /after a set of pulses are called
     def reset_last(self):
+        #self.num_steps=0
         self.last = 0
+       # self.write_step()
 
+    def set_home(self):
+        self.num_steps=0
 
+    def dist_travel(self):
+        return (self.num_steps/self.step_size)*(12*math.pi)*(1.8/360)
+    
+    def rot_travel(self):
+        return (self.num_steps/self.step_size)*(12/20)*1.8

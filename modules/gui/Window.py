@@ -1,8 +1,9 @@
 from multiprocessing.connection import Connection
-from PyQt5.QtCore import QPoint
+from PyQt5.QtCore import QPoint, QTimer
 from PyQt5.QtGui import QGuiApplication
-from PyQt5.QtWidgets import  QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QGridLayout, QLabel, QPushButton, QApplication, QLineEdit
+from PyQt5.QtWidgets import  QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QGridLayout, QLabel, QPushButton, QApplication, QLineEdit, QMessageBox
 
+from ..shared.machinestatus import MachineStatus
 from .DrawWidget import DrawWidget
 from .StartStop import StartStop
 from .UserInputs import UserInputs
@@ -31,13 +32,12 @@ class Window(QMainWindow):
         #initializing widgets
         central_widget = QWidget()
         self.WindowMotorMovement = MotorMovement()
-
         self.DrawWidget = DrawWidget()
 
         self.DrawWidget.MotorMovement = self.WindowMotorMovement
         self.StartStop = StartStop(self.conn, self.WindowMotorMovement)
-        self.UserInputs = UserInputs()
-        self.UserInputs.MotorMovement = self.WindowMotorMovement
+        self.UserInputs = UserInputs(self.conn, self.WindowMotorMovement)
+        #self.UserInputs.MotorMovement = self.WindowMotorMovement
 
         
         layout1.addWidget(self.DrawWidget, 0, 0)
@@ -75,6 +75,27 @@ class Window(QMainWindow):
 
         #self.StartStop.setMaximumSize(1080, 720)
         #self.StartStop.setMinimumSize(1080,720)
-        self.setCentralWidget(central_widget)       
+        self.setCentralWidget(central_widget)
+        self.message = QTimer()
+        self.message.timeout.connect(self.show_message)
+        self.message.start(100)
 
+    def show_message(self):
+        if self.conn.poll():
+                stat=self.conn.recv()
+                if stat==MachineStatus.ERROR:
+                    message =self.conn.recv()
+                    msg = QMessageBox()
+                    if message=="System is now home.":
+                        msg.setIcon(QMessageBox.Information)
+                        msg.setWindowTitle("Information") 
+                    else:
+                        msg.setIcon(QMessageBox.Warning)
+                        msg.setWindowTitle("Warning")
+                    msg.setText(message)
+                    msg.exec_()
+
+    def closeEvent(self, event):
+        self.conn.send(MachineStatus.KILL)
+        event.accept()
 

@@ -1,7 +1,9 @@
+from multiprocessing.connection import Connection
 from PyQt5.QtCore import QPoint, pyqtSignal, QPointF,QRegExp, QLocale
 from PyQt5.QtGui import QGuiApplication, QDoubleValidator, QIntValidator, QRegExpValidator
 from PyQt5.QtWidgets import  QGridLayout, QWidget, QLabel, QLineEdit, QTabWidget, QVBoxLayout, QDoubleSpinBox, QSpinBox
 from pyqt_switch import PyQtSwitch
+from ..shared.machinestatus import MachineStatus
 
 from .DrawWidget import DrawWidget
 from .MotorMovement import MotorMovement
@@ -10,10 +12,10 @@ from math import atan2, pi, cos, sin, tan
 class UserInputs(QWidget):
     updateSignal = pyqtSignal()
 
-    def __init__(self, parent= None):
+    def __init__(self,conn: Connection, movement, parent= None):
         super().__init__(parent)
-
-        self.MotorMovement = MotorMovement()
+        self.conn = conn
+        self.MotorMovement = movement
 
         #initialize tab object that will contain each tab
         self.tabs = QTabWidget()
@@ -167,7 +169,8 @@ class UserInputs(QWidget):
 
         self.startRotationInput.editingFinished.connect(lambda: self.MotorMovement.setRot([self.startRotationInput.value(),self.endRotationInput.value()]))
         self.endRotationInput.editingFinished.connect(lambda: self.MotorMovement.setRot([self.startRotationInput.value(),self.endRotationInput.value()]))
-        self.enableRotSwitch.toggled.connect(lambda: self.MotorMovement.toggleEnableRot())
+        self.oscillationInput.editingFinished.connect(lambda: self.MotorMovement.setOsc(self.oscillationInput.value()))
+        self.enableRotSwitch.toggled.connect(lambda: self.toggle_en())
 
 
         self.speedInput.editingFinished.connect(lambda: self.updateSpeed('speed'))
@@ -189,7 +192,6 @@ class UserInputs(QWidget):
             angle = atan2((self.MotorMovement.getPoints()[0].y()-self.MotorMovement.getPoints()[1].y()),(self.MotorMovement.getPoints()[1].x()-self.MotorMovement.getPoints()[0].x()))*180/pi
             self.pathAngleInput.setValue((angle))
             self.updateSpeed("speed") 
-
 
     def updateSpeed(self,field):
         if(self.distanceInput.value()!=0):
@@ -304,4 +306,8 @@ class UserInputs(QWidget):
             input.setValue((stop))
         elif(value<start):
             input.setValue((start))
+
+    def toggle_en(self):
+        self.MotorMovement.toggleEnableRot()
+        self.conn.send(MachineStatus.TOGGLEROT)
     

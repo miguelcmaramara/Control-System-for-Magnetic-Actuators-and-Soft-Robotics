@@ -46,15 +46,18 @@ class StartStop(QWidget):
         
     
     def mousePressEvent(self,event):
-        print("Clicking in startstop")
+        #print("Clicking in startstop")
         # Trigger run function
         #self.conn.send(MachineStatus.RUNNING)
         return
 
     def startPressEvent(self):
-
+        if len(self.motor_movement.getPoints())==2:
+            self.conn.send(MachineStatus.RUNNING)
+            self.conn.send(self.motor_movement)
+            pass
         #Trigger run function
-        self.conn.send(MachineStatus.RUNNING)
+        #self.conn.send(MachineStatus.DEBUG)
         return
     
     def stopPressEvent(self):
@@ -67,6 +70,7 @@ class StartStop(QWidget):
         return
     
     def returnStartPressEvent(self):
-        self.conn.send(MachineStatus.GOPOS)
-        self.conn.send(self.motor_movement)
+        if len(self.motor_movement.getPoints())>0:
+            self.conn.send(MachineStatus.GOPOS)
+            self.conn.send(self.motor_movement)
         return

@@ -3,7 +3,8 @@ class MotorMovement():
 
         self.points  = []
         self.speed = 0
-        self.rotationAngle = []
+        self.rotationAngle = [0,0]
+        self.oscNum=0
         self.enableRot = True
 
     def getPoints(self):
@@ -32,3 +33,7 @@ class MotorMovement():
         return self.enableRot
     def toggleEnableRot(self):
         self.enableRot = not self.enableRot
+    def getOsc(self):
+        return self.oscNum
+    def setOsc(self,osc):
+        self.oscNum =osc

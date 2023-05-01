@@ -1,6 +1,6 @@
 import time
 import RPi.GPIO as GPIO
-from .encoderTest import encoder
+from .Encoder import encoder
 #from RpiMotorLib import RpiMotorLib
 
 

@@ -5,7 +5,7 @@ class encoder:
     def __init__(self, pin_A, pin_B, pin_X):
         # allows for empty Stepper_motor
         self.Encoder_Count = 0
-        if pin_A< 0 and pin_B < 0 and pin_X < 0:
+        if pin_A< 0 and pin_B < 0 and pin_X is not None and pin_X < 0:
             return
 
         self.pin_A = pin_A
@@ -14,37 +14,34 @@ class encoder:
         # setmode if not set already
         if(GPIO.getmode() is None):
             GPIO.setmode(GPIO.BOARD)
-        GPIO.setup(self.pin_A, GPIO.IN, )
-        GPIO.setup(self.pin_B, GPIO.IN, )
-        GPIO.setup(self.pin_X, GPIO.IN, )
+        GPIO.setup(self.pin_A, GPIO.IN)
+        GPIO.setup(self.pin_B, GPIO.IN)
+        GPIO.setup(self.pin_X, GPIO.IN)
 
         GPIO.add_event_detect (self.pin_A, GPIO.FALLING, callback=self.do_Encoder)   # Interrupt
-        GPIO.add_event_detect (self.pin_X, GPIO.FALLING, callback=self.do_Index)   # Index interrupt
+        # GPIO.add_event_detect (self.pin_X, GPIO.FALLING, callback=self.do_Index)   # Index interrupt
 
     def do_Encoder(self, channel):
-        # global last
-        # if(time.time_ns() - last < 3000):
-            # return
-        # self.last = time.time_ns()
 
-        # global Encoder_Count
         global prev
         if GPIO.input(self.pin_B) == 1:
             self.Encoder_Count += 1
-            print("  +")
         else:
             self.Encoder_Count -= 1
-            print("-")
+
+        return self.Encoder_Count
 
     def do_Index(self, channel):
        # global Encoder_Count
        # self.Encoder_Count = 0
-       print("x key reset")
+    #    print("x key reset")
+        pass
         
     def get_steps(self):
         return self.Encoder_Count
 
     def reset_steps(self):
+        print('encoder reset')
         self.Encoder_Count = 0
 
 
