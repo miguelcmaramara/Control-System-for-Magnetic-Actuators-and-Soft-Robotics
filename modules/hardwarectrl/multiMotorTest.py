@@ -19,14 +19,17 @@ class Motor_controller:
             h_mot_h: Stepper_motor,
             v_mot: Stepper_motor,
             r_mot: Stepper_motor,
-            conn: Connection
+            conn: Connection,
+            config
         ):
         self.h_mot_l = h_mot_l
         self.h_mot_h = h_mot_h
         self.v_mot = v_mot
         self.r_mot = r_mot
         self.conn =conn
-        self.runpin = 11
+        self.config=config
+        self.canRead =True
+        self.runpin = int(self.config['pi4.Misc.pins']['pico_run'])
         GPIO.setup(self.runpin,GPIO.OUT)
         GPIO.output(self.runpin, 1)
         time.sleep(.5)
@@ -57,7 +60,6 @@ class Motor_controller:
     def run(self, move_cmd: list[tuple]):
         # delay tuple is in following order: h_mot_l, h_mot_h, v_mot, r_mot time del
         # time del is the amount of time that it's active
-
         self.h_mot_l.reset_last()
         self.h_mot_h.reset_last()
         self.v_mot.reset_last()
@@ -67,13 +69,18 @@ class Motor_controller:
             if move_cmd[i][0]=="Move":
                 #print("Moving")
                 delay_tup = move_cmd[i][1:]
-                #PID CALCULATION 
-                PID = self.find_PID()
-                delay_tup = tuple(delay_tup[i]-PID[i] for i in range(len(delay_tup)))
-                self.h_mot_l.num_steps=int(self.data/(1000**3))*16
-                self.h_mot_h.num_steps=int((self.data/(1000**2))%1000)*16
-                self.v_mot.num_steps=int((self.data/1000)%1000)*16
-                self.r_mot.num_steps=int(self.data%1000)*16
+                #PID CALCULATION
+                #if self.canRead:
+                    #self.error[0]=self.h_mot_l.dist_travel()-self.find_distance(int(self.data/(1000**3)))
+                    #self.error[1]=self.h_mot_h.dist_travel()-self.find_distance(int((self.data/(1000**2))%1000))
+                    #self.error[2]=self.v_mot.dist_travel()-self.find_distance(int((self.data/1000)%1000))
+                    #self.error[3]=self.r_mot.rot_travel()-self.find_rotation(int(self.data%1000-100))
+                    #PID = self.find_PID()
+                    #delay_tup = tuple(delay_tup[i]-PID[i] for i in range(len(delay_tup)))
+                    #self.h_mot_l.num_steps=int(self.data/(1000**3))*16
+                    #self.h_mot_h.num_steps=int((self.data/(1000**2))%1000)*16
+                    #self.v_mot.num_steps=int((self.data/1000)%1000)*16
+                    #self.r_mot.num_steps=int(self.data%1000-100)*16
                 start = time.time_ns()
                 self.h_mot_l.delay = delay_tup[0]
                 self.h_mot_h.delay = delay_tup[1]
@@ -88,14 +95,13 @@ class Motor_controller:
                     motor_now =time.time_ns()-motor_start
                     if now > delay_tup[4] or self.error_msg:
                         break
-                    if self.encoder.in_waiting>0:
-                        self.data = int.from_bytes(self.encoder.read(5),"big")
+                    if self.encoder.in_waiting>4 and self.canRead:
+                        a=self.encoder.read_until(size=5)
+                        #print(a)
+                        self.data = int.from_bytes(a,"big")
                         print("test",self.data)
                 
-                    self.error[0]=self.h_mot_l.dist_travel()-self.find_distance(int(self.data/(1000**3)))
-                    self.error[1]=self.h_mot_h.dist_travel()-self.find_distance(int((self.data/(1000**2))%1000))
-                    self.error[2]=self.v_mot.dist_travel()-self.find_distance(int((self.data/1000)%1000))
-                    self.error[3]=self.r_mot.rot_travel()-self.find_rotation(int(self.data%1000))
+
 
                     self.h_mot_l.check_del(int(motor_now))
                     self.h_mot_h.check_del(int(motor_now))
@@ -112,6 +118,7 @@ class Motor_controller:
                 if stat==MachineStatus.OFF:
                     print("END")
                     self.error_msg=True
+                    self.set_actives(0)
                     break
                 if stat==MachineStatus.KILL:
                     print("Kill")
@@ -119,6 +126,8 @@ class Motor_controller:
             if self.error_msg:
                 print("error")
                 break
+        while self.encoder.in_waiting>0:
+            dump = self.encoder.read_all()
     
 
     def print_current_positions(self):
@@ -149,6 +158,16 @@ class Motor_controller:
         self.v_mot.set_home()
         self.r_mot.set_home()
         self.encoder.write(b's')
+        time.sleep(.5)
+        gotS = False
+        while self.encoder.in_waiting>0:
+            response = self.encoder.read(1)
+            if response==b's':
+                gotS=True
+                break
+        if not gotS:
+            self.conn.send(MachineStatus.ERROR)
+            self.conn.send("Encoder readings did not reset properly at home.")
         self.x=0
         self.y=0
         self.rot=0
@@ -160,13 +179,28 @@ class Motor_controller:
         return value*360/100*(12/20)
     
     def find_PID(self):
-        return [i*50000 for i in self.error]
+        return [i*10000 for i in self.error]
     
     def set_position(self, x, y, rot):
         self.x = x
         self.y =y
         self.rot = rot
-    
+
+    def encoder_count(self, step):
+        self.encoder.write(step)
+        time.sleep(.5)
+        if self.encoder.in_waiting>0:
+            response = self.encoder.read()
+            if response !=step:
+                self.canRead = False
+                self.conn.send(MachineStatus.ERROR)
+                self.conn.send("Encoder readings not active for this motion.")
+            else:
+                self.canRead = True
+        else:
+            self.canRead = False
+            self.conn.send(MachineStatus.ERROR)
+            self.conn.send("Encoder readings not active for this motion.")
 
     
 

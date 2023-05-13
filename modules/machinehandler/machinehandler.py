@@ -12,7 +12,8 @@ class MachineHandler:
         self.config = config
         self.conn = conn
         self.move = MotorMovement()
-        self.error_pin=12
+        self.error_pin=int(self.config['pi4.Misc.pins']['error_pin'])
+        self.in_interrupt=False
         pass
 
     def run(self):
@@ -24,42 +25,47 @@ class MachineHandler:
 
         self.home_axes()
         while(True):
-            stat = self.conn.recv()
-            if(stat == MachineStatus.RUNNING):
-                if self.mc.get_actives()==1:
-                    print("RUNNING BUT NOT IMPLEMENTED YET")
-                    self.move =self.conn.recv()
-                    self.moveMagnet(self.findVelocity())
-                    #self.mc.run(self.controls)
-                else:
-                    #send home message
-                    self.conn.send(MachineStatus.ERROR)
-                    self.conn.send("Please Home First")
-                    pass
-            if(stat == MachineStatus.HOME):
-                print("HOMING")
-                self.home_axes()
-            if(stat == MachineStatus.GOPOS):
-                if self.mc.get_actives()==1:
-                    print("GOING TO POSITION")
-                    move = self.conn.recv()
-                    #print(move.points[0].x())
-                    #print(move.points[0].y())
-                    self.goToPt(move.getPoints()[0].x(), move.getPoints()[0].y(),move.getRot()[0])
-                else:
-                    #send home message
-                    self.conn.send(MachineStatus.ERROR)
-                    self.conn.send("Please Home First")
-                    pass
-            if(stat ==MachineStatus.TOGGLEROT):
-                self.mc.r_mot.write_enable()
-            if(stat == MachineStatus.DEBUG):
-                speeds=[60000]
-                for i in speeds:
-                    self.testSpeed(i)
-            if(stat ==MachineStatus.KILL):
-                exit()
-
+            #print("loop")
+            if self.conn.poll():
+                #print("READ")
+                stat = self.conn.recv()
+                #print(stat)
+                if(stat == MachineStatus.RUNNING):
+                    if self.mc.get_actives()==1:
+                        self.move =self.conn.recv()
+                        self.moveMagnet(self.findVelocity())
+                        #self.mc.run(self.controls)
+                    else:
+                        #send home message
+                        self.conn.send(MachineStatus.ERROR)
+                        self.conn.send("Please Home First")
+                        pass
+                if(stat == MachineStatus.HOME):
+                    print("HOMING")
+                    self.home_axes()
+                if(stat == MachineStatus.GOPOS):
+                    if self.mc.get_actives()==1:
+                        print("GOING TO POSITION")
+                        move = self.conn.recv()
+                        #print(move.points[0].x())
+                        #print(move.points[0].y())
+                        self.goToPt(move.getPoints()[0].x(), move.getPoints()[0].y(),move.getRot()[0])
+                        #print("back to loop")
+                    else:
+                        #send home message
+                        self.conn.send(MachineStatus.ERROR)
+                        self.conn.send("Please Home First")
+                        pass
+                if(stat ==MachineStatus.TOGGLEROT):
+                    self.mc.r_mot.write_enable()
+                if(stat == MachineStatus.DEBUG):
+                    speeds=[60000]
+                    for i in speeds:
+                        self.testSpeed(i)
+                if(stat ==MachineStatus.KILL):
+                    print("Exit")
+                    exit()
+        print("WHY you break")
                 #self.home_axes
 
     # initializes the motors and puts them into the motor control object
@@ -104,7 +110,7 @@ class MachineHandler:
                  limit_switch=int(self.config['pi4.pins.rotational']['limit_switch'])
                  )
 
-        self.mc = Motor_controller(h_mot_l, h_mot_h, v_mot, r_mot,self.conn)
+        self.mc = Motor_controller(h_mot_l, h_mot_h, v_mot, r_mot,self.conn,self.config)
         self.controls=[]
         #self.controls = [
         #        (5000000, 250000, 5000000, 250000, 3000000000),
@@ -123,9 +129,9 @@ class MachineHandler:
         new_step = 8
         old_step = 8
         delay_convert = 1#old_step/new_step
-        self.mc.h_mot_h.write_modes(new_step)
-        self.mc.h_mot_l.write_modes(new_step)
-        self.mc.v_mot.write_modes(new_step)
+        # self.mc.h_mot_h.write_modes(new_step)
+        # self.mc.h_mot_l.write_modes(new_step)
+        # self.mc.v_mot.write_modes(new_step)
         start = time.time_ns()
         # set a signal type
         self.mc.h_mot_l.set_limit_action(sig_type=GPIO.FALLING)
@@ -146,7 +152,7 @@ class MachineHandler:
         self.mc.set_en_sb(1, 1)
         while (self.mc.h_mot_h.get_active()==1 or self.mc.h_mot_l.get_active()==1 or self.mc.v_mot.get_active()==1 or self.mc.r_mot.get_active()==1) and (time.time_ns()-start)<25000000000 and not self.mc.error_msg:
             self.controls = [
-                ("Move",750000, 750000, 750000, 1500000, 5000000)
+                ("Move",400000, 400000, 400000, 1500000, 5000000)
                 #(5000000, 5000000, 5000000, 5000000, 10000000000),
                 #(5000000, 5000000, 5000000, 250000, 3000000000),
                 #(5000000, 5000000, 5000000, 5000000, 3000000000),
@@ -167,7 +173,7 @@ class MachineHandler:
         self.mc.r_mot.set_limit_action(0)
         self.mc.run([("Move",1500000, 1500000, 500000, 1500000, 1500000*200*2)])
         self.mc.run([("Move",1500000*(400*2*20/12), 1500000*(400*2*20/12), 1500000*(400*2*20/12), 1500000, 1500000*((400*2*20/12)-135))])
-        if time.time_ns()-start>27000000000 or self.mc.error_msg:
+        if time.time_ns()-start>26000000000 or self.mc.error_msg:
             print("Failed to Home")
             self.mc.set_actives(0)
             self.conn.send(MachineStatus.ERROR)
@@ -191,19 +197,35 @@ class MachineHandler:
         degPerPulse = 1.8/8
         mmPerPulse = 6 / degPerRad  * degPerPulse
         print(mmPerPulse)
-        xPulsesToMove = (x-self.mc.x) / mmPerPulse
-        yPulsesToMove = (y-self.mc.y) / mmPerPulse #  + xPulsesToMove  # since y has to move faster
+
+        yPulsesToMove = 2*(y-self.mc.y) / mmPerPulse    # since y has to move faster
+        xPulsesToMove = 2*(x-self.mc.x) / mmPerPulse +yPulsesToMove
         print(x-self.mc.x)
         print(y-self.mc.y)
-        rotPulesToMove = (rot-self.mc.rot)*(20/12)/(degPerPulse)
+        rotPulesToMove = 2*(rot-self.mc.rot)*(20/12)/(degPerPulse)
+        print(rot-self.mc.rot)
+        print(rotPulesToMove)
+        speed= 60
+        speed_pulse=speed/mmPerPulse
+        if yPulsesToMove >= xPulsesToMove and abs(yPulsesToMove)> 50:
+            timeToComp = abs(yPulsesToMove/speed_pulse)
+        elif yPulsesToMove < xPulsesToMove and abs(xPulsesToMove)>50:
+            timeToComp = abs(xPulsesToMove/speed_pulse)
+        else:
+            timeToComp = 5
 
-        timeToComp = 10000000000
+        timeToComp *=1000000000
+        #timeToComp = 7000000000
         
         
 
-        xVel = xPulsesToMove / timeToComp
-        yVel = yPulsesToMove / timeToComp + xVel
-        rotVel = rotPulesToMove/ timeToComp
+
+        yVel = yPulsesToMove / timeToComp
+        xVel = xPulsesToMove / timeToComp #+yVel
+        rotVel = math.copysign(1,rotPulesToMove)*speed_pulse /1000000000
+        timeToRot= abs(rotPulesToMove/speed_pulse)
+        timeToRot *=1000000000
+
         if xVel == 0:
             xDel = timeToComp*1.1
         else:
@@ -213,17 +235,15 @@ class MachineHandler:
         else:
             yDel = 1/yVel
         if rotVel ==0:
-            rotDel = timeToComp*1.1
+            rotDel = timeToRot*1.1
         else:
             rotDel = 1/rotVel
+        print(rotDel,timeToRot)
+        self.controls = [("Move",abs(yDel), abs(yDel), abs(xDel), timeToComp*1.5, timeToComp/100)]*100
 
-        self.controls = [
-                ("Move",abs(xDel), abs(xDel), abs(yDel), abs(rotDel), timeToComp/100)
-            ]*100
-
-        self.mc.h_mot_h.write_dir(math.copysign(1,xDel))
-        self.mc.h_mot_l.write_dir(math.copysign(1,xDel))
-        self.mc.v_mot.write_dir(math.copysign(1,yDel))
+        self.mc.h_mot_h.write_dir(math.copysign(1,yDel))
+        self.mc.h_mot_l.write_dir(math.copysign(1,yDel))
+        self.mc.v_mot.write_dir(math.copysign(1,xDel))
         self.mc.r_mot.write_dir(-1*math.copysign(1,rotDel))
         self.mc.set_en_sb(1, 1)
         self.mc.h_mot_l.set_limit_action(fxn =self.limit_error, sig_type=GPIO.FALLING)
@@ -233,19 +253,28 @@ class MachineHandler:
         self.mc.r_mot.set_limit_action(fxn =self.limit_error,sig_type=GPIO.FALLING)
         self.set_error_action(fxn=self.limit_error, sig_type=GPIO.FALLING)
         self.mc.run(self.controls)
+        self.controls=[("Move",timeToRot*1.1,timeToRot*1.1,timeToRot*1.1,abs(rotDel),timeToRot/100)]*100
+        self.mc.run(self.controls)
         self.mc.set_en_sb(0, 1)
         self.mc.h_mot_l.set_limit_action(0)
         self.mc.h_mot_h.set_limit_action(0)
         self.mc.v_mot.set_limit_action(0)
         self.mc.r_mot.set_limit_action(0)
         self.set_error_action(0)
-        self.mc.x = self.mc.h_mot_h.dist_travel()
-        self.mc.y = self.mc.v_mot.dist_travel()
+        self.mc.y = self.mc.h_mot_h.dist_travel()
+        self.mc.x = self.mc.v_mot.dist_travel()-self.mc.y
         self.mc.rot = self.mc.r_mot.rot_travel()
+        print(self.mc.x,x)
+        print(self.mc.y,y)
+        print(self.mc.rot,rot)
         if abs(self.mc.x-x)>10 or abs(self.mc.y-y)>10 or abs(self.mc.rot-rot)>5:
             self.conn.send(MachineStatus.ERROR)
             self.conn.send("System start position is not exact.\n Please try again.")
         print("At Position")
+        while self.in_interrupt:
+            #print(self.in_interrupt)
+            pass
+        print("Passed")
 
     def moveMagnet(self,delay:list):
         self.goToPt(self.move.getPoints()[0].x(),self.move.getPoints()[0].y(),self.move.getRot()[0])
@@ -288,6 +317,10 @@ class MachineHandler:
         self.controls*=self.move.getOsc()
         self.mc.set_en_sb(1, 1)
         #print(self.controls)
+        if self.move.getSpeed()>125:
+            self.mc.encoder_count(b'2')
+        else:
+            self.mc.encoder_count(b'1')
         self.mc.run(self.controls)
         self.mc.set_en_sb(0, 1)
         self.mc.h_mot_l.set_limit_action(0)
@@ -296,6 +329,8 @@ class MachineHandler:
         self.mc.r_mot.set_limit_action(0)
         self.set_error_action(0)
         self.mc.set_actives(0)
+        while self.in_interrupt:
+            pass
 
     def findVelocity(self):
         delta_x = self.move.getPoints()[1].x()-self.move.getPoints()[0].x()
@@ -340,12 +375,39 @@ class MachineHandler:
 
     def limit_error(self,num):
         print("WHY")
+        self.in_interrupt=True
         self.mc.set_actives(0)
         self.mc.error_msg=True     
         #send message to front end
+        #time.sleep(.001)
+        #self.mc.error_msg=False
+        #self.mc.h_mot_h.write_dir(1)
+        #self.mc.h_mot_l.write_dir(1)
+        #self.mc.v_mot.write_dir(1)
+        #self.mc.r_mot.write_dir(0)
+        #if num ==int(self.config['pi4.pins.vertical']['limit_switch']):
+        #    self.mc.v_mot.set_active(1)
+        #    self.mc.run([("Move",1500000, 1500000, 500000, 1500000, 1500000*200*2)])
+        #    self.mc.v_mot.set_active(0)
+        #if num == int(self.config['pi4.pins.horizontal.light']['limit_switch']) or num == int(self.config['pi4.pins.horizontal.heavy']['limit_switch']) :
+        #    self.mc.h_mot_h.set_active(1)
+        #    self.mc.h_mot_l.set_active(1)
+        #    self.mc.run([("Move",1500000, 1500000, 500000, 1500000, 1500000*200*2)])
+        #    self.mc.h_mot_h.set_active(0)
+        #    self.mc.h_mot_l.set_active(0)
+        #if num == int(self.config['pi4.pins.rotational']['limit_switch']):
+        #    print("test")
+        #    self.mc.r_mot.set_active(1)
+        #    self.mc.run([("Move",1500000, 1500000, 500000, 1500000, 1500000*200*2)])
+        #    self.mc.r_mot.set_active(0)
+        #self.mc.error_msg=True 
         self.conn.send(MachineStatus.ERROR)
-        self.conn.send("System hit the edge. \nPosition is incorrect, please home before continuing.")
-        time.delay(.001)
+        self.conn.send("System hit the edge. \nPosition is incorrect, please home before continuing. ")#+ str(num))
+        #switch directions
+        #move back so there is no home issue
+        #time.sleep(.01)
+        print("test")
+        self.in_interrupt =False
          
     def set_error_action(self, set=1, fxn=None, sig_type=GPIO.RISING):
         #callback=self.limit_error()
@@ -355,6 +417,8 @@ class MachineHandler:
         if(set):
             GPIO.setup(self.error_pin, GPIO.IN)
             GPIO.add_event_detect(self.error_pin, sig_type, callback=callback)
+            #print("Set Up Error",self.error_pin)
+            #print(GPIO.input(self.error_pin))
         else:   # if not set, then unset
             GPIO.remove_event_detect(self.error_pin)
         

@@ -246,4 +246,4 @@ class Stepper_motor:
         return (self.num_steps/self.step_size)*(12*math.pi)*(1.8/360)
     
     def rot_travel(self):
-        return (self.num_steps/self.step_size)*(12/20)*1.8
+        return (self.num_steps/self.step_size)*(12/20)*1.8 *-1
