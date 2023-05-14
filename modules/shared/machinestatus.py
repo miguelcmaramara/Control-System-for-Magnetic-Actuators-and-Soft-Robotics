@@ -1,5 +1,5 @@
 from enum import Enum
-
+#List of possible statuses that would be sent between the front and back end
 class MachineStatus(Enum):
     ERROR = -1
     OFF = 0

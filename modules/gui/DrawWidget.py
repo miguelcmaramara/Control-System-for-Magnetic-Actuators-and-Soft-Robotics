@@ -105,6 +105,8 @@ class DrawWidget(QWidget):
 
     def mouseMoveEvent(self, event):
         #Allows for the click and drag adjustment of the line
+        #if any of the movement is out of bounds it would only adjust the dimension that is in bounds and the dimension out of bounds
+        #would be set to the max value it can be
         if  self.last_click: #and event.pos().x()<350*self.scale and event.pos().y()<275*self.scale and event.pos().x()>0 and event.pos().y()>0:
             self.points[1] = event.pos()/self.scale
             if event.pos().x()>350*self.scale:
@@ -131,12 +133,13 @@ class DrawWidget(QWidget):
             self.MotorMovement.setPoints(self.points)
             self.update()
 
+    #when button is released, set both clicks to false
     def mouseReleaseEvent(self, event):
         self.last_click = False
         self.first_click = False
 
 
-
+    #main paint event
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.drawImage(QPointF(), self._image_layer)
@@ -201,6 +204,8 @@ class DrawWidget(QWidget):
 
 
         painter.end()
-
+    
+    #scale of the system based on dimensions of the users monitor, makes sure the the image is properly scaled to represent
+    #the total range of motion
     def setScale(self,s):
         self.scale = s

@@ -102,6 +102,7 @@ class Stepper_motor:
         self.active = val
         print("HERE")
 
+    # returns the motors active flag
     def get_active(self):
         return self.active
 
@@ -133,7 +134,7 @@ class Stepper_motor:
         if dir < -1:     # if no arg provided, flip direction
             self.dir = 0 if self.dir == 1 else 1
         elif dir == 0 or dir==-1:
-            self.dir = 0    # if 0, set 0
+            self.dir = 0    # if 0, or negative 1 (to help make things more dynamic) set 0
         else:
             self.dir = 1    # if positive, set to 1
 
@@ -146,10 +147,10 @@ class Stepper_motor:
 
         if step < 0:    # if no arg provided, write the opposite of previous step
             if self.step ==0:
-                self.step=1
-                if self.dir==0:
+                self.step=1 #when stepping 
+                if self.dir==0:  #if direction is negative remove a step
                     self.num_steps-=1
-                else:
+                else: #otherwise add the step
                     self.num_steps+=1
             else:
                 self.step=0
@@ -167,13 +168,14 @@ class Stepper_motor:
         
         GPIO.output(self.step_pin, self.step)
 
+    #checks if it is time for the motors to step and steps when it is time
     def check_del(self, curr_time: int):
         if self.active == 0:
             return
-        # this function will take a step if the delay is appropriate, else it will return
+        # if less then delay time has passed since last step just return
         if curr_time - self.last < self.delay:
             return
-
+        #otherwise increment last by delay and write step
         self.last += self.delay
         self.write_step()
         # self.write_step()
@@ -233,17 +235,23 @@ class Stepper_motor:
 
 
     # last time that motor should have moved.
-    # this should be called before /after a set of pulses are called
+    # this should be called before a motion
     def reset_last(self):
         #self.num_steps=0
         self.last = 0
        # self.write_step()
 
+    #resets the total number of steps the motor has moved
+    #should be called when the system homes
     def set_home(self):
         self.num_steps=0
 
+    #Gets the distance traveled (mm) for the linear motions
+    #Using 1/8 step size and the pully with a 12mm diameter
     def dist_travel(self):
         return (self.num_steps/self.step_size)*(12*math.pi)*(1.8/360)
     
+    #Gets the angled traveled for the  rotation
+    #Using 1/8 step size
     def rot_travel(self):
         return (self.num_steps/self.step_size)*(12/20)*1.8 *-1

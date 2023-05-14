@@ -49,7 +49,7 @@ class Window(QMainWindow):
         #set layout
         central_widget.setLayout(layout1)
 
-        
+        #find screen geometry
         dim = QApplication.desktop().screenGeometry()
 
         neww = int(dim.width() *(1/2))
@@ -68,7 +68,9 @@ class Window(QMainWindow):
         #Setting drawwidget size
         #self.DrawWidget.setMaximumSize(neww, newh)
         #self.DrawWidget.setMinimumSize(neww,newh)
+        #finds the proper scale for the widget that the bounds could fit properly based on the different moniter size
         scale = min(neww/350, newh/260)
+        #set the draw widget to the proper scale and inform it able the scale
         self.DrawWidget.setMaximumSize(350*scale, 260*scale)
         self.DrawWidget.setMinimumSize(350*scale,260*scale)
         self.DrawWidget.setScale(scale)
@@ -76,16 +78,23 @@ class Window(QMainWindow):
         #self.StartStop.setMaximumSize(1080, 720)
         #self.StartStop.setMinimumSize(1080,720)
         self.setCentralWidget(central_widget)
+        #creates a timer used to read if messages are being sent from the back end
         self.message = QTimer()
         self.message.timeout.connect(self.show_message)
         self.message.start(100)
 
+    #function called at ever instance of the timer
     def show_message(self):
+        #if a message is send from the back end
         if self.conn.poll():
+                #read the message
                 stat=self.conn.recv()
+                #if it is any error message
                 if stat==MachineStatus.ERROR:
+                    #the next message would be a string containing message details
                     message =self.conn.recv()
                     msg = QMessageBox()
+                    #display the message in a message box to have it pop up for the user
                     if message=="System is now home.":
                         msg.setIcon(QMessageBox.Information)
                         msg.setWindowTitle("Information") 
@@ -95,6 +104,7 @@ class Window(QMainWindow):
                     msg.setText(message)
                     msg.exec_()
 
+    #if the window is closing, send a message to the back end so that process could end as well.
     def closeEvent(self, event):
         self.conn.send(MachineStatus.KILL)
         event.accept()
